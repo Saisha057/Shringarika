@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Product Update - Debug Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #da190b;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Product Update Debug Tool</h1>
+    
+    <div class="section">
+        <h2>1. Check Authentication Status</h2>
+        <button onclick="checkAuth()">Check Auth Tokens</button>
+        <button onclick="checkAdminStatus()">Check Admin Status</button>
+        <pre id="authStatus">Click buttons to check authentication...</pre>
+    </div>
+
+    <div class="section">
+        <h2>2. Test Backend Connection</h2>
+        <button onclick="testBackend()">Test Backend Health</button>
+        <button onclick="fetchProducts()">Fetch Products</button>
+        <pre id="backendStatus">Click buttons to test backend...</pre>
+    </div>
+
+    <div class="section">
+        <h2>3. Test Product Update</h2>
+        <label>Product ID:</label>
+        <input type="text" id="productId" placeholder="Enter product ID" value="1">
+        
+        <label>Product Name:</label>
+        <input type="text" id="productName" placeholder="Enter new product name" value="Test Product Update">
+        
+        <label>Product Price:</label>
+        <input type="number" id="productPrice" placeholder="Enter new price" value="999">
+        
+        <button onclick="testProductUpdate()">Test Update Product</button>
+        <button onclick="testProductUpdateDetailed()">Test Update (Detailed)</button>
+        <pre id="updateStatus">Enter product details and click test...</pre>
+    </div>
+
+    <div class="section">
+        <h2>4. Database Check</h2>
+        <button onclick="checkDatabase()">Check Database Connection</button>
+        <button onclick="checkProductsTable()">Check Products Table</button>
+        <pre id="databaseStatus">Click buttons to check database...</pre>
+    </div>
+
+    <div class="section">
+        <h2>5. Console Logs</h2>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <button onclick="exportLogs()">Export Logs</button>
+        <pre id="consoleLogs">Logs will appear here...</pre>
+    </div>
+
+    <script>
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push(logEntry);
+            console.log(message);
+            
+            // Update console logs section
+            const consoleLogsEl = document.getElementById('consoleLogs');
+            if (consoleLogsEl) {
+                consoleLogsEl.textContent = logs.slice(-50).join('\n'); // Keep last 50 logs
+                consoleLogsEl.scrollTop = consoleLogsEl.scrollHeight;
+            }
+        }
+
+        function clearLogs() {
+            logs = [];
+            document.getElementById('consoleLogs').textContent = 'Logs cleared.';
+        }
+
+        function exportLogs() {
+            const blob = new Blob([logs.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `product-update-debug-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('Logs exported successfully');
+        }
+
+        async function checkAuth() {
+            log('Checking authentication tokens...');
+            const authToken = localStorage.getItem('authToken');
+            const adminToken = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('token');
+            
+            const result = {
+                authToken: authToken ? `Present (${authToken.substring(0, 20)}...)` : 'Not found',
+                adminToken: adminToken ? `Present (${adminToken.substring(0, 20)}...)` : 'Not found',
+                token: token ? `Present (${token.substring(0, 20)}...)` : 'Not found',
+                allKeys: Object.keys(localStorage)
+            };
+            
+            document.getElementById('authStatus').textContent = JSON.stringify(result, null, 2);
+            log(`Auth check complete. Keys found: ${Object.keys(localStorage).join(', ')}`);
+            
+            if (!authToken && !adminToken && !token) {
+                document.getElementById('authStatus').innerHTML += '\n\n<span class="error">⚠️ NO AUTH TOKENS FOUND! This is likely the issue.</span>';
+                log('ERROR: No authentication tokens found in localStorage', 'error');
+            }
+        }
+
+        async function checkAdminStatus() {
+            log('Checking admin status from backend...');
+            try {
+                const response = await fetch('/api/admin/verify', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('adminToken') || localStorage.getItem('token')}`
+                    },
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                document.getElementById('authStatus').textContent = JSON.stringify({
+                    status: response.status,
+                    ok: response.ok,
+                    data: data
+                }, null, 2);
+                log(`Admin status: ${response.ok ? 'VERIFIED' : 'FAILED'}`);
+            } catch (error) {
+                document.getElementById('authStatus').textContent = `Error: ${error.message}`;
+                log(`Admin check error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBackend() {
+            log('Testing backend health...');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('backendStatus').textContent = JSON.stringify(data, null, 2);
+                log(`Backend health: ${data.status}`);
+            } catch (error) {
+                document.getElementById('backendStatus').textContent = `Error: ${error.message}`;
+                log(`Backend error: ${error.message}`, 'error');
+            }
+        }
+
+        async function fetchProducts() {
+            log('Fetching products...');
+            try {
+                const response = await fetch('/api/products');
+                const data = await response.json();
+                const products = data.data || data;
+                document.getElementById('backendStatus').textContent = JSON.stringify({
+                    totalProducts: products.length,
+                    sampleProduct: products[0] || 'No products found'
+                }, null, 2);
+                log(`Fetched ${products.length} products`);
+            } catch (error) {
+                document.getElementById('backendStatus').textContent = `Error: ${error.message}`;
+                log(`Fetch products error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProductUpdate() {
+            const productId = document.getElementById('productId').value;
+            const productName = document.getElementById('productName').value;
+            const productPrice = document.getElementById('productPrice').value;
+            
+            log(`Testing product update for ID: ${productId}`);
+            
+            try {
+                const token = localStorage.getItem('authToken') || localStorage.getItem('adminToken') || localStorage.getItem('token');
+                
+                if (!token) {
+                    document.getElementById('updateStatus').innerHTML = '<span class="error">❌ NO AUTH TOKEN FOUND! Cannot update products without authentication.</span>';
+                    log('ERROR: No authentication token available', 'error');
+                    return;
+                }
+
+                const updateData = {
+                    name: productName,
+                    price: parseFloat(productPrice)
+                };
+
+                log(`Sending update request with data: ${JSON.stringify(updateData)}`);
+
+                const response = await fetch(`/api/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(updateData)
+                });
+
+                log(`Response status: ${response.status} ${response.statusText}`);
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('updateStatus').innerHTML = `<span class="success">✅ SUCCESS!</span>\n\n${JSON.stringify(data, null, 2)}`;
+                    log('Product update successful!');
+                } else {
+                    document.getElementById('updateStatus').innerHTML = `<span class="error">❌ FAILED!</span>\n\nStatus: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+                    log(`Product update failed: ${response.status} - ${data.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                document.getElementById('updateStatus').innerHTML = `<span class="error">❌ ERROR!</span>\n\n${error.message}`;
+                log(`Product update exception: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProductUpdateDetailed() {
+            const productId = document.getElementById('productId').value;
+            const productName = document.getElementById('productName').value;
+            const productPrice = document.getElementById('productPrice').value;
+            
+            log('Starting detailed product update test...');
+            
+            const statusEl = document.getElementById('updateStatus');
+            statusEl.innerHTML = '<span class="warning">⏳ Testing...</span>';
+
+            // Step 1: Check auth
+            const token = localStorage.getItem('authToken') || localStorage.getItem('adminToken') || localStorage.getItem('token');
+            if (!token) {
+                statusEl.innerHTML = '<span class="error">❌ STEP 1 FAILED: No auth token</span>';
+                log('FAILED: No auth token', 'error');
+                return;
+            }
+            statusEl.innerHTML += '\n✅ Step 1: Auth token found';
+            log('Step 1 passed: Auth token found');
+
+            // Step 2: Test backend connection
+            try {
+                const healthResponse = await fetch('/api/health');
+                if (!healthResponse.ok) {
+                    statusEl.innerHTML += '\n❌ STEP 2 FAILED: Backend not responding';
+                    log('FAILED: Backend not responding', 'error');
+                    return;
+                }
+                statusEl.innerHTML += '\n✅ Step 2: Backend is running';
+                log('Step 2 passed: Backend is running');
+            } catch (error) {
+                statusEl.innerHTML += `\n❌ STEP 2 FAILED: ${error.message}`;
+                log(`FAILED: Backend connection - ${error.message}`, 'error');
+                return;
+            }
+
+            // Step 3: Fetch product to verify it exists
+            try {
+                const fetchResponse = await fetch(`/api/products/${productId}`);
+                if (!fetchResponse.ok) {
+                    statusEl.innerHTML += `\n❌ STEP 3 FAILED: Product ${productId} not found`;
+                    log(`FAILED: Product ${productId} not found`, 'error');
+                    return;
+                }
+                const productData = await fetchResponse.json();
+                statusEl.innerHTML += `\n✅ Step 3: Product found - ${productData.data?.name || productData.name}`;
+                log(`Step 3 passed: Product found - ${productData.data?.name || productData.name}`);
+            } catch (error) {
+                statusEl.innerHTML += `\n❌ STEP 3 FAILED: ${error.message}`;
+                log(`FAILED: Fetch product - ${error.message}`, 'error');
+                return;
+            }
+
+            // Step 4: Attempt update
+            try {
+                const updateData = {
+                    name: productName,
+                    price: parseFloat(productPrice)
+                };
+
+                log(`Attempting update with: ${JSON.stringify(updateData)}`);
+
+                const updateResponse = await fetch(`/api/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(updateData)
+                });
+
+                const updateResult = await updateResponse.json();
+
+                if (updateResponse.ok) {
+                    statusEl.innerHTML += '\n\n<span class="success">✅ STEP 4: UPDATE SUCCESSFUL!</span>\n\n' + JSON.stringify(updateResult, null, 2);
+                    log('SUCCESS: Product updated successfully!');
+                } else {
+                    statusEl.innerHTML += `\n\n<span class="error">❌ STEP 4 FAILED: ${updateResponse.status}</span>\n\n${JSON.stringify(updateResult, null, 2)}`;
+                    log(`FAILED: Update failed with status ${updateResponse.status} - ${updateResult.message || 'Unknown error'}`, 'error');
+                    
+                    // Additional diagnostics
+                    if (updateResponse.status === 401) {
+                        statusEl.innerHTML += '\n\n<span class="error">🔒 Authentication issue - Token may be invalid or expired</span>';
+                        log('Authentication issue detected', 'error');
+                    } else if (updateResponse.status === 403) {
+                        statusEl.innerHTML += '\n\n<span class="error">🚫 Authorization issue - User may not have admin privileges</span>';
+                        log('Authorization issue detected', 'error');
+                    }
+                }
+            } catch (error) {
+                statusEl.innerHTML += `\n\n<span class="error">❌ STEP 4 FAILED: ${error.message}</span>`;
+                log(`FAILED: Update exception - ${error.message}`, 'error');
+            }
+        }
+
+        async function checkDatabase() {
+            log('Checking database connection...');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('databaseStatus').textContent = JSON.stringify({
+                    status: data.status,
+                    database: data.database || 'Unknown',
+                    supabase: data.supabase || 'Unknown'
+                }, null, 2);
+                log(`Database status: ${data.database || 'Unknown'}`);
+            } catch (error) {
+                document.getElementById('databaseStatus').textContent = `Error: ${error.message}`;
+                log(`Database check error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkProductsTable() {
+            log('Checking products table...');
+            try {
+                const response = await fetch('/api/products?limit=1');
+                const data = await response.json();
+                const products = data.data || data;
+                
+                if (products.length > 0) {
+                    const sampleProduct = products[0];
+                    document.getElementById('databaseStatus').textContent = JSON.stringify({
+                        status: 'Products table accessible',
+                        sampleProductId: sampleProduct.id,
+                        sampleProductName: sampleProduct.name,
+                        totalColumns: Object.keys(sampleProduct).length,
+                        columns: Object.keys(sampleProduct)
+                    }, null, 2);
+                    log('Products table is accessible');
+                } else {
+                    document.getElementById('databaseStatus').textContent = 'Products table is empty';
+                    log('Products table is empty');
+                }
+            } catch (error) {
+                document.getElementById('databaseStatus').textContent = `Error: ${error.message}`;
+                log(`Products table check error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run checks on load
+        window.addEventListener('load', () => {
+            log('Debug tool loaded');
+            checkAuth();
+            setTimeout(() => testBackend(), 500);
+        });
+    </script>
+</body>
+</html>

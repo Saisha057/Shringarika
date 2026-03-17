@@ -1,0 +1,17 @@
+# Render Deployment Configuration
+
+services:
+  - type: web
+    name: shringarika-ecommerce
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm run install-all && npm run build:prod
+    startCommand: cd server && NODE_ENV=production npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # Add all other environment variables in Render dashboard

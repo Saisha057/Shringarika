@@ -1,0 +1,13 @@
+# Railway Deployment Configuration
+
+[build]
+builder = "nixpacks"
+buildCommand = "npm run install-all && npm run build:prod"
+
+[deploy]
+startCommand = "cd server && NODE_ENV=production npm start"
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"

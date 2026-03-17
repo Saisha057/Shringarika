@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Orders Status Update Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        #console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-time { color: #808080; }
+        .log-info { color: #4fc3f7; }
+        .log-success { color: #66bb6a; }
+        .log-error { color: #ef5350; }
+        .log-warning { color: #ffca28; }
+        .credentials {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 15px;
+        }
+        .order-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .test-step {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 User Orders Status Update - Comprehensive Test</h1>
+        <p>Test real-time status updates, refresh mechanisms, and Return/Exchange functionality</p>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Test Configuration</h3>
+        <div class="credentials">
+            <strong>⚠️ Required Setup:</strong><br>
+            1. Backend running on http://localhost:5000<br>
+            2. Frontend running on http://localhost:3000<br>
+            3. Admin credentials: admin@admin.com / admin123<br>
+            4. Test user credentials: user@example.com / password123<br>
+            5. At least one order exists in the database
+        </div>
+        
+        <label for="apiUrl">API URL:</label>
+        <input type="text" id="apiUrl" value="http://localhost:5000/api" style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <br><br>
+        
+        <label for="adminEmail">Admin Email:</label>
+        <input type="email" id="adminEmail" value="admin@admin.com" style="width: 200px; padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        
+        <label for="adminPassword">Password:</label>
+        <input type="password" id="adminPassword" value="admin123" style="width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <br><br>
+        
+        <label for="userEmail">User Email:</label>
+        <input type="email" id="userEmail" value="user@example.com" style="width: 200px; padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        
+        <label for="userPassword">Password:</label>
+        <input type="password" id="userPassword" value="password123" style="width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Test 1: Backend Status Update</h3>
+        <div class="test-step">
+            <span class="step-number">1</span> Login as Admin
+            <button onclick="loginAsAdmin()">Login Admin</button>
+            <span id="adminStatus"></span>
+        </div>
+        
+        <div class="test-step">
+            <span class="step-number">2</span> Fetch All Orders
+            <button onclick="fetchAdminOrders()" id="btnFetchOrders" disabled>Fetch Orders</button>
+            <div id="ordersList"></div>
+        </div>
+        
+        <div class="test-step">
+            <span class="step-number">3</span> Update Order Status
+            <select id="orderSelect" disabled style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
+                <option value="">Select an order</option>
+            </select>
+            <select id="statusSelect" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="processing">Processing</option>
+                <option value="packed">Packed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <button onclick="updateOrderStatus()" id="btnUpdateStatus" disabled>Update Status</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>👤 Test 2: User Orders Page</h3>
+        <div class="test-step">
+            <span class="step-number">1</span> Login as User
+            <button onclick="loginAsUser()">Login User</button>
+            <span id="userStatus"></span>
+        </div>
+        
+        <div class="test-step">
+            <span class="step-number">2</span> Fetch User Orders
+            <button onclick="fetchUserOrders()" id="btnFetchUserOrders" disabled>Fetch My Orders</button>
+            <button onclick="fetchUserOrders()" id="btnRefreshOrders" disabled>🔄 Refresh</button>
+            <div id="userOrdersList"></div>
+        </div>
+        
+        <div class="test-step">
+            <span class="step-number">3</span> Check for Return/Exchange Buttons
+            <div id="deliveredOrderCheck"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔄 Test 3: Auto-Refresh Mechanisms</h3>
+        <div class="test-step">
+            <p><strong>Manual Test Steps:</strong></p>
+            <ol>
+                <li>Open http://localhost:3000 in a new tab</li>
+                <li>Login as user and go to "My Orders" page</li>
+                <li>Keep that tab open</li>
+                <li>Come back to this tab and update an order status to "Delivered"</li>
+                <li>Switch back to the user tab → Orders should auto-refresh</li>
+                <li>Open browser console (F12) to see refresh logs</li>
+            </ol>
+            <p><strong>Expected Console Logs:</strong></p>
+            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px;">
+🔄 Page became visible, refreshing orders...
+📥 fetchOrders called, refreshKey: X
+🎯 [ORDER xxx] Backend status: delivered, order_status: delivered, normalized: delivered
+            </pre>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 Console Output</h3>
+        <button onclick="clearConsole()">Clear Console</button>
+        <div id="console"></div>
+    </div>
+
+    <script>
+        let adminToken = null;
+        let userToken = null;
+        let currentAdminOrders = [];
+        
+        function log(message, type = 'info') {
+            const console_div = document.getElementById('console');
+            const time = new Date().toLocaleTimeString();
+            const typeClass = `log-${type}`;
+            const icon = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️'
+            }[type] || 'ℹ️';
+            
+            console_div.innerHTML += `<span class="log-time">[${time}]</span> <span class="${typeClass}">${icon} ${message}</span>\n`;
+            console_div.scrollTop = console_div.scrollHeight;
+        }
+        
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+        }
+        
+        async function loginAsAdmin() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const apiUrl = document.getElementById('apiUrl').value;
+            
+            log('Logging in as admin...', 'info');
+            
+            try {
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.token) {
+                    adminToken = data.data.token;
+                    document.getElementById('adminStatus').innerHTML = '<span class="status-badge status-delivered">✅ Admin Logged In</span>';
+                    document.getElementById('btnFetchOrders').disabled = false;
+                    log(`Admin login successful! Token: ${adminToken.substring(0, 20)}...`, 'success');
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (error) {
+                log(`Admin login failed: ${error.message}`, 'error');
+                document.getElementById('adminStatus').innerHTML = '<span class="status-badge status-cancelled">❌ Login Failed</span>';
+            }
+        }
+        
+        async function fetchAdminOrders() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            log('Fetching admin orders...', 'info');
+            
+            try {
+                const response = await fetch(`${apiUrl}/admin/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.orders) {
+                    currentAdminOrders = data.data.orders;
+                    log(`Fetched ${currentAdminOrders.length} orders`, 'success');
+                    
+                    // Populate order dropdown
+                    const select = document.getElementById('orderSelect');
+                    select.innerHTML = '<option value="">Select an order</option>';
+                    currentAdminOrders.forEach(order => {
+                        const option = document.createElement('option');
+                        option.value = order.id;
+                        option.textContent = `Order #${order.order_number} - ${order.order_status || 'N/A'}`;
+                        select.appendChild(option);
+                    });
+                    select.disabled = false;
+                    document.getElementById('btnUpdateStatus').disabled = false;
+                    
+                    // Display orders
+                    const ordersList = document.getElementById('ordersList');
+                    ordersList.innerHTML = currentAdminOrders.map(order => `
+                        <div class="order-card">
+                            <strong>Order #${order.order_number}</strong><br>
+                            User: ${order.user?.email || 'N/A'}<br>
+                            Status: <span class="status-badge status-${order.order_status}">${order.order_status || 'N/A'}</span><br>
+                            Total: ₹${order.total_price || 0}
+                        </div>
+                    `).join('');
+                } else {
+                    throw new Error(data.message || 'Failed to fetch orders');
+                }
+            } catch (error) {
+                log(`Failed to fetch orders: ${error.message}`, 'error');
+            }
+        }
+        
+        async function updateOrderStatus() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const orderId = document.getElementById('orderSelect').value;
+            const newStatus = document.getElementById('statusSelect').value;
+            
+            if (!orderId) {
+                log('Please select an order', 'warning');
+                return;
+            }
+            
+            log(`Updating order ${orderId} to status: ${newStatus}`, 'info');
+            
+            try {
+                const response = await fetch(`${apiUrl}/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderStatus: newStatus,
+                        note: 'Status updated via test page'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    log(`✅ Order status updated successfully!`, 'success');
+                    log(`   Order ID: ${orderId}`, 'success');
+                    log(`   New Status: ${newStatus}`, 'success');
+                    log(`   Database should now show: order_status="${newStatus}" AND status="${newStatus}"`, 'success');
+                    
+                    // Refresh order list
+                    await fetchAdminOrders();
+                } else {
+                    throw new Error(data.message || 'Update failed');
+                }
+            } catch (error) {
+                log(`Failed to update order: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loginAsUser() {
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const apiUrl = document.getElementById('apiUrl').value;
+            
+            log('Logging in as user...', 'info');
+            
+            try {
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.token) {
+                    userToken = data.data.token;
+                    document.getElementById('userStatus').innerHTML = '<span class="status-badge status-delivered">✅ User Logged In</span>';
+                    document.getElementById('btnFetchUserOrders').disabled = false;
+                    document.getElementById('btnRefreshOrders').disabled = false;
+                    log(`User login successful! Token: ${userToken.substring(0, 20)}...`, 'success');
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (error) {
+                log(`User login failed: ${error.message}`, 'error');
+                document.getElementById('userStatus').innerHTML = '<span class="status-badge status-cancelled">❌ Login Failed</span>';
+            }
+        }
+        
+        async function fetchUserOrders() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            log('📦 Fetching user orders...', 'info');
+            
+            try {
+                const response = await fetch(`${apiUrl}/orders/myorders`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.orders) {
+                    const orders = data.data.orders;
+                    log(`✅ Fetched ${orders.length} user orders`, 'success');
+                    
+                    // Display orders
+                    const userOrdersList = document.getElementById('userOrdersList');
+                    userOrdersList.innerHTML = orders.map(order => {
+                        const status = order.status || order.order_status || order.orderStatus || 'N/A';
+                        const isDelivered = status.toLowerCase() === 'delivered';
+                        
+                        log(`🎯 Order ${order.id}: status="${order.status}", order_status="${order.order_status}", orderStatus="${order.orderStatus}", normalized="${status}"`, 'info');
+                        
+                        return `
+                            <div class="order-card">
+                                <strong>Order #${order.order_number}</strong><br>
+                                Status: <span class="status-badge status-${status}">${status}</span><br>
+                                Total: ₹${order.total_price || 0}<br>
+                                ${isDelivered ? '<br><strong style="color: green;">✅ Return/Exchange buttons should be visible!</strong>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // Check for delivered orders
+                    const deliveredOrders = orders.filter(o => {
+                        const status = (o.status || o.order_status || o.orderStatus || '').toLowerCase();
+                        return status === 'delivered';
+                    });
+                    
+                    const deliveredCheck = document.getElementById('deliveredOrderCheck');
+                    if (deliveredOrders.length > 0) {
+                        deliveredCheck.innerHTML = `
+                            <div style="background: #d4edda; padding: 15px; border-radius: 6px; border-left: 4px solid #28a745;">
+                                <strong style="color: #155724;">✅ Found ${deliveredOrders.length} delivered order(s)</strong><br>
+                                Return and Exchange buttons should be visible on the frontend.<br>
+                                <small>Go to http://localhost:3000 → My Orders to verify</small>
+                            </div>
+                        `;
+                    } else {
+                        deliveredCheck.innerHTML = `
+                            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                                <strong style="color: #856404;">⚠️ No delivered orders found</strong><br>
+                                Update an order to "delivered" status using Test 1 above.
+                            </div>
+                        `;
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to fetch orders');
+                }
+            } catch (error) {
+                log(`❌ Failed to fetch user orders: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        log('Test page loaded. Start by logging in as Admin.', 'info');
+    </script>
+</body>
+</html>

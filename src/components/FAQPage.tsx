@@ -1,0 +1,337 @@
+import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+
+interface FAQPageProps {
+  onNavigateHome: () => void;
+}
+
+interface FAQItem {
+  id: number;
+  question: string;
+  answer: string;
+  category: string;
+}
+
+const faqData: FAQItem[] = [
+  // Shipping & Delivery
+  {
+    id: 1,
+    question: "How long does shipping take?",
+    answer: "Standard shipping takes 5-7 business days for domestic orders. Express shipping is available and takes 2-3 business days. International orders typically take 10-20 business days depending on the destination country. Same-day delivery is available in select metro cities.",
+    category: "Shipping & Delivery"
+  },
+  {
+    id: 2,
+    question: "Do you offer free shipping?",
+    answer: "Yes! We offer free standard shipping on all orders above ₹2,500 within India. For orders below this amount, a nominal shipping fee of ₹99-250 applies depending on your location. International shipping costs are calculated at checkout based on destination and weight.",
+    category: "Shipping & Delivery"
+  },
+  {
+    id: 3,
+    question: "Can I track my order?",
+    answer: "Absolutely! Once your order ships, you'll receive a tracking number via email and SMS. You can track your order in real-time through our website by visiting the 'Orders' section in your account, or by using the tracking link provided in the shipping confirmation email.",
+    category: "Shipping & Delivery"
+  },
+  {
+    id: 4,
+    question: "What if my order is delayed?",
+    answer: "While we strive for timely delivery, delays can occasionally occur due to weather, customs, or courier issues. If your order is delayed beyond the estimated delivery date, please contact our customer service team at support@shringarika.com. We'll investigate immediately and provide updates or alternative solutions.",
+    category: "Shipping & Delivery"
+  },
+  
+  // Returns & Refunds
+  {
+    id: 5,
+    question: "What is your return policy?",
+    answer: "We offer a 30-day return policy from the date of delivery. Items must be unused, in original condition with all tags attached, and in the original packaging. Made-to-order and custom items cannot be returned unless defective. Return shipping is free for orders above ₹5,000 within India.",
+    category: "Returns & Refunds"
+  },
+  {
+    id: 6,
+    question: "How do I initiate a return?",
+    answer: "To initiate a return, log into your account, go to 'Orders', select the order you want to return, and click 'Request Return'. Choose your reason and our team will approve within 24 hours. You'll receive a return shipping label via email. Pack the item securely and ship it back within 7 days of approval.",
+    category: "Returns & Refunds"
+  },
+  {
+    id: 7,
+    question: "When will I receive my refund?",
+    answer: "Once we receive and inspect your returned item (typically 2-3 business days after receipt), your refund will be processed within 5-7 business days. The refund will be credited to your original payment method. For prepaid orders, you can also opt for store credit which is issued immediately.",
+    category: "Returns & Refunds"
+  },
+  {
+    id: 8,
+    question: "Can I exchange an item instead of returning it?",
+    answer: "Yes! We offer free exchanges for size or style changes. Simply select 'Exchange' when initiating your return. We'll ship the replacement item as soon as we receive your original item back. Exchange shipping is free on all orders within India.",
+    category: "Returns & Refunds"
+  },
+  
+  // Payment & Safety
+  {
+    id: 9,
+    question: "What payment methods do you accept?",
+    answer: "We accept all major credit/debit cards (Visa, Mastercard, American Express, RuPay), UPI payments, net banking, digital wallets (Paytm, PhonePe, Google Pay), and Cash on Delivery (COD) for orders below ₹50,000. International payments are processed securely through our payment gateway.",
+    category: "Payment & Safety"
+  },
+  {
+    id: 10,
+    question: "Is it safe to pay online on your website?",
+    answer: "Absolutely! We use industry-standard SSL encryption and PCI-DSS compliant payment gateways to ensure your payment information is completely secure. We never store your complete card details on our servers. All transactions are processed through secure, encrypted channels.",
+    category: "Payment & Safety"
+  },
+  {
+    id: 11,
+    question: "Can I use multiple payment methods for one order?",
+    answer: "Currently, we support one payment method per order. However, you can use gift cards or store credit in combination with any other payment method. If you need to split payment between two cards, please contact our customer service team for assistance.",
+    category: "Payment & Safety"
+  },
+  {
+    id: 12,
+    question: "What should I do if my payment fails?",
+    answer: "If your payment fails, please check your card details, ensure sufficient balance, and verify that online transactions are enabled. Try a different payment method or contact your bank. If the issue persists, reach out to our support team at support@shringarika.com with your order number.",
+    category: "Payment & Safety"
+  },
+  
+  // Account & Login
+  {
+    id: 13,
+    question: "Do I need an account to place an order?",
+    answer: "Yes, an account is required to place orders on Shringarika. Creating an account allows you to track orders, save addresses, manage wishlist, and enjoy a faster checkout experience. Registration is quick and free - just provide your name, email, and create a password.",
+    category: "Account & Login"
+  },
+  {
+    id: 14,
+    question: "I forgot my password. How do I reset it?",
+    answer: "Click on 'Forgot Password' on the login page, enter your registered email address, and we'll send you a password reset link. Click the link in the email and create a new password. The reset link is valid for 24 hours. If you don't receive the email, check your spam folder.",
+    category: "Account & Login"
+  },
+  {
+    id: 15,
+    question: "Can I change my email address?",
+    answer: "Yes, you can update your email address from your Account Settings. Go to Profile > Edit Information > Email Address. You'll receive a verification email at your new address to confirm the change. For security, you'll need to verify your current password before making this change.",
+    category: "Account & Login"
+  },
+  {
+    id: 16,
+    question: "How do I delete my account?",
+    answer: "We're sorry to see you go! To delete your account, go to Settings > Account Management > Delete Account. You'll be asked to confirm this action. Please note that account deletion is permanent and you'll lose access to order history, wishlist, and saved addresses. Pending orders must be completed or cancelled first.",
+    category: "Account & Login"
+  },
+  
+  // Product Information
+  {
+    id: 17,
+    question: "Are your jewelry pieces made of real gold/silver?",
+    answer: "Our collection includes both fine jewelry (real gold, silver, and precious stones) and fashion jewelry (gold-plated, silver-plated, and high-quality alloys). Each product page clearly indicates the material composition. All fine jewelry comes with authenticity certificates and hallmarking.",
+    category: "Product Information"
+  },
+  {
+    id: 18,
+    question: "How do I know my ring/bracelet size?",
+    answer: "We provide a detailed size guide on each product page. You can also download our printable ring sizer or order a free physical ring sizer kit. For personalized sizing assistance, contact our customer service team. If you order the wrong size, we offer free size exchanges within 30 days.",
+    category: "Product Information"
+  },
+  {
+    id: 19,
+    question: "Do you offer customization services?",
+    answer: "Yes! We offer custom design services for engagement rings, wedding bands, and special occasion jewelry. Contact our design team at custom@shringarika.com to discuss your requirements. Custom orders typically take 15-21 business days and require a 50% advance payment.",
+    category: "Product Information"
+  },
+  {
+    id: 20,
+    question: "How should I care for my jewelry?",
+    answer: "Store jewelry in a cool, dry place away from direct sunlight. Clean gold jewelry with warm soapy water and a soft brush. For silver, use a silver polishing cloth. Remove jewelry before swimming, exercising, or using chemicals. Detailed care instructions are included with each purchase.",
+    category: "Product Information"
+  },
+  
+  // Order Tracking
+  {
+    id: 21,
+    question: "How can I track my order?",
+    answer: "Once your order ships, you'll receive a tracking number via email and SMS. Log into your account, go to 'My Orders', and click on the order you want to track. You'll see real-time updates on your package location and estimated delivery date. You can also track directly on the courier's website.",
+    category: "Order Tracking"
+  },
+  {
+    id: 22,
+    question: "Why isn't my tracking number working?",
+    answer: "Tracking information can take 12-24 hours to activate after shipping. If your tracking number still doesn't work after 24 hours, it may be entered incorrectly. Copy the number from your shipping confirmation email and try again. If issues persist, contact our support team.",
+    category: "Order Tracking"
+  },
+  {
+    id: 23,
+    question: "Can I change my delivery address after ordering?",
+    answer: "If your order hasn't shipped yet, contact us immediately at support@shringarika.com with your order number and new address. We'll update it if possible. Once shipped, we can request an address change with the courier, but this isn't always possible. Plan ahead to avoid delivery issues.",
+    category: "Order Tracking"
+  },
+  {
+    id: 24,
+    question: "What if my order shows 'delivered' but I didn't receive it?",
+    answer: "First, check with family members or neighbors who might have accepted the package. Look around your delivery location (porch, mailbox, building reception). Contact the courier directly using your tracking number. If you still can't locate it, reach out to us within 48 hours and we'll investigate immediately.",
+    category: "Order Tracking"
+  }
+];
+
+const categories = [
+  "All",
+  "Shipping & Delivery",
+  "Returns & Refunds",
+  "Payment & Safety",
+  "Account & Login",
+  "Product Information",
+  "Order Tracking"
+];
+
+export function FAQPage({ onNavigateHome }: FAQPageProps) {
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const toggleFAQ = (id: number) => {
+    setOpenId(openId === id ? null : id);
+  };
+
+  // Filter FAQs based on category and search
+  const filteredFAQs = faqData.filter(faq => {
+    const matchesCategory = selectedCategory === "All" || faq.category === selectedCategory;
+    const matchesSearch = searchQuery === "" || 
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  return (
+    <div className="min-h-screen bg-neutral-50 animate-fadeIn">
+      {/* Header with Back Button */}
+      <div className="bg-white border-b border-neutral-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-6 py-4">
+          <button
+            onClick={onNavigateHome}
+            className="flex items-center gap-2 text-sm tracking-wider hover:underline transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>HOME</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+        {/* Page Title */}
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl tracking-widest mb-2 md:mb-3 break-words">FREQUENTLY ASKED QUESTIONS</h1>
+          <p className="text-neutral-600 text-sm sm:text-base md:text-lg break-words">
+            Find answers to common queries about orders, shipping, returns, and more.
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <input
+            type="text"
+            placeholder="Search questions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-sm"
+          />
+        </div>
+
+        {/* Category Filter Tabs */}
+        <div className="mb-10 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 md:gap-3 min-w-max pb-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 md:px-5 rounded-full text-xs md:text-sm tracking-wider transition-all duration-200 whitespace-nowrap ${
+                  selectedCategory === category
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black border border-neutral-300 hover:border-black'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ Accordion */}
+        {filteredFAQs.length > 0 ? (
+          <div className="space-y-4">
+            {filteredFAQs.map((faq) => (
+              <div
+                key={faq.id}
+                className="bg-white rounded-lg border border-neutral-200 overflow-hidden transition-all duration-300 hover:shadow-md"
+              >
+                <button
+                  onClick={() => toggleFAQ(faq.id)}
+                  className="w-full flex items-start justify-between px-4 py-3 md:px-5 md:py-4 text-left hover:bg-neutral-50 transition-colors duration-200"
+                  aria-expanded={openId === faq.id}
+                  aria-controls={`faq-answer-${faq.id}`}
+                >
+                  <div className="flex-1 pr-3 min-w-0">
+                    <h3 className="text-base md:text-lg tracking-wide mb-1 overflow-wrap-anywhere break-words">{faq.question}</h3>
+                    <span className="text-xs text-neutral-500 tracking-wide">{faq.category}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 md:w-5 md:h-5 text-neutral-600 transition-transform duration-300 flex-shrink-0 mt-1 ${
+                      openId === faq.id ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                
+                {/* Answer - Collapsible */}
+                <div
+                  id={`faq-answer-${faq.id}`}
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    openId === faq.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                  style={{
+                    transitionProperty: 'max-height, opacity',
+                  }}
+                >
+                  <div className="px-4 pb-4 pt-2 md:px-5 md:pb-5">
+                    <p className="text-sm md:text-base text-neutral-700 leading-relaxed overflow-wrap-anywhere break-words whitespace-normal">{faq.answer}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-neutral-500 text-lg mb-4">No questions found matching your search.</p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCategory("All");
+              }}
+              className="text-black underline hover:no-underline"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+
+        {/* Contact Section */}
+        <div className="mt-12 md:mt-16 bg-neutral-100 rounded-lg p-6 md:p-8 text-center">
+          <h2 className="text-xl md:text-2xl tracking-wider mb-3 md:mb-4 break-words">Still Have Questions?</h2>
+          <p className="text-sm md:text-base text-neutral-700 mb-4 md:mb-6 break-words px-2">
+            Can't find the answer you're looking for? Our customer support team is here to help.
+          </p>
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4">
+            <button
+              onClick={onNavigateHome}
+              className="px-5 md:px-6 py-2.5 md:py-3 bg-black text-white text-sm tracking-wider hover:bg-neutral-800 transition-colors duration-200"
+            >
+              BACK TO HOME
+            </button>
+            <a
+              href="mailto:support@shringarika.com"
+              className="px-5 md:px-6 py-2.5 md:py-3 border border-black text-sm tracking-wider hover:bg-black hover:text-white transition-colors duration-200 inline-block"
+            >
+              CONTACT SUPPORT
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check localStorage Products</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+        }
+        .product {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+        .product-price {
+            font-size: 16px;
+            color: #666;
+        }
+        .images-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 3px solid #000;
+        }
+        .image-item {
+            margin: 5px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            word-break: break-all;
+            font-size: 12px;
+        }
+        .image-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+        .type-http {
+            background: #4CAF50;
+            color: white;
+        }
+        .type-data {
+            background: #ff9800;
+            color: white;
+        }
+        .type-relative {
+            background: #2196F3;
+            color: white;
+        }
+        .type-invalid {
+            background: #f44336;
+            color: white;
+        }
+        .summary {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .summary h2 {
+            margin-top: 0;
+        }
+        .stat {
+            display: inline-block;
+            margin: 5px 15px 5px 0;
+        }
+        .stat-label {
+            font-weight: bold;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffecb5;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            color: #999;
+        }
+        button {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #333;
+        }
+        .thumbnail {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📦 localStorage Products Inspector</h1>
+    
+    <div>
+        <button onclick="loadProducts()">🔄 Reload Products</button>
+        <button onclick="clearProducts()">🗑️ Clear Products</button>
+        <button onclick="window.location.href='http://localhost:3000'">🏠 Go to Website</button>
+    </div>
+
+    <div id="content"></div>
+
+    <script>
+        function getImageType(url) {
+            if (!url || typeof url !== 'string') {
+                return { type: 'invalid', label: 'INVALID', class: 'type-invalid' };
+            }
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                return { type: 'http', label: 'HTTP', class: 'type-http' };
+            }
+            if (url.startsWith('data:')) {
+                return { type: 'data', label: 'DATA URI', class: 'type-data' };
+            }
+            if (url.startsWith('/')) {
+                return { type: 'relative', label: 'RELATIVE', class: 'type-relative' };
+            }
+            return { type: 'invalid', label: 'UNKNOWN', class: 'type-invalid' };
+        }
+
+        function loadProducts() {
+            const contentDiv = document.getElementById('content');
+            const productsJSON = localStorage.getItem('adminProducts');
+            
+            if (!productsJSON) {
+                contentDiv.innerHTML = `
+                    <div class="no-data">
+                        <h2>❌ No Products Found in localStorage</h2>
+                        <p>The 'adminProducts' key does not exist in localStorage.</p>
+                        <p>Please add some products from the admin panel first.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let products;
+            try {
+                products = JSON.parse(productsJSON);
+            } catch (e) {
+                contentDiv.innerHTML = `
+                    <div class="warning">
+                        <h2>⚠️ Error Parsing Products</h2>
+                        <p>${e.message}</p>
+                        <pre>${productsJSON}</pre>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!Array.isArray(products) || products.length === 0) {
+                contentDiv.innerHTML = `
+                    <div class="no-data">
+                        <h2>📭 Products Array is Empty</h2>
+                        <p>Add products from the admin panel to see them here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Statistics
+            let totalImages = 0;
+            let httpImages = 0;
+            let dataImages = 0;
+            let relativeImages = 0;
+            let invalidImages = 0;
+
+            products.forEach(p => {
+                if (p.images && Array.isArray(p.images)) {
+                    totalImages += p.images.length;
+                    p.images.forEach(img => {
+                        const type = getImageType(img).type;
+                        if (type === 'http') httpImages++;
+                        else if (type === 'data') dataImages++;
+                        else if (type === 'relative') relativeImages++;
+                        else invalidImages++;
+                    });
+                }
+            });
+
+            let html = `
+                <div class="summary">
+                    <h2>📊 Summary</h2>
+                    <div class="stat"><span class="stat-label">Total Products:</span> ${products.length}</div>
+                    <div class="stat"><span class="stat-label">Total Images:</span> ${totalImages}</div>
+                    <div class="stat"><span class="stat-label">HTTP URLs:</span> ${httpImages} ✅</div>
+                    <div class="stat"><span class="stat-label">Data URIs:</span> ${dataImages} ${dataImages > 0 ? '⚠️' : ''}</div>
+                    <div class="stat"><span class="stat-label">Relative Paths:</span> ${relativeImages}</div>
+                    <div class="stat"><span class="stat-label">Invalid:</span> ${invalidImages} ${invalidImages > 0 ? '❌' : ''}</div>
+                </div>
+            `;
+
+            if (dataImages > 0 || invalidImages > 0) {
+                html += `
+                    <div class="warning">
+                        <h3>⚠️ Image Issues Detected!</h3>
+                        <ul>
+                            ${dataImages > 0 ? '<li><strong>Data URIs Found:</strong> These may cause ERR_INVALID_URL errors in browsers. Consider uploading images to Cloudinary or using HTTP URLs instead.</li>' : ''}
+                            ${invalidImages > 0 ? '<li><strong>Invalid Image URLs:</strong> Some images have invalid or missing URLs.</li>' : ''}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            products.forEach((product, index) => {
+                const images = product.images || [];
+                html += `
+                    <div class="product">
+                        <div class="product-header">
+                            <div class="product-name">${index + 1}. ${product.name || 'Unnamed Product'}</div>
+                            <div class="product-price">₹${product.price || 0}</div>
+                        </div>
+                        <div><strong>ID:</strong> ${product.id}</div>
+                        <div><strong>Category:</strong> ${product.category || 'N/A'}</div>
+                        <div><strong>Stock:</strong> ${product.inStock ? 'In Stock' : 'Out of Stock'}</div>
+                        
+                        <div class="images-section">
+                            <strong>Images (${images.length}):</strong>
+                            ${images.length === 0 ? '<div class="image-item"><span class="image-type type-invalid">NO IMAGES</span></div>' : ''}
+                            ${images.map((img, imgIndex) => {
+                                const imgType = getImageType(img);
+                                let preview = '';
+                                if (imgType.type === 'http') {
+                                    preview = `<img src="${img}" class="thumbnail" onerror="this.style.display='none'" />`;
+                                } else if (imgType.type === 'data') {
+                                    preview = `<img src="${img}" class="thumbnail" onerror="this.style.display='none'" />`;
+                                }
+                                return `
+                                    <div class="image-item">
+                                        <span class="image-type ${imgType.class}">${imgType.label}</span>
+                                        <strong>[${imgIndex}]:</strong> ${img ? img.substring(0, 100) + (img.length > 100 ? '...' : '') : 'null'}
+                                        ${preview}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            contentDiv.innerHTML = html;
+        }
+
+        function clearProducts() {
+            if (confirm('Are you sure you want to clear all products from localStorage?')) {
+                localStorage.removeItem('adminProducts');
+                alert('Products cleared! Reloading...');
+                loadProducts();
+            }
+        }
+
+        // Load on page load
+        loadProducts();
+    </script>
+</body>
+</html>

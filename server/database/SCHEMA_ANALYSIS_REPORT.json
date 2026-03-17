@@ -1,0 +1,30 @@
+{
+  "criticalIssues": [
+    {
+      "table": "product_variants",
+      "issue": "ALL 4 products have NO variants",
+      "reason": "Product.model.js doesn't create variants, prevents orders",
+      "fix": "Run migration 013 + update Product.model.js"
+    }
+  ],
+  "unnecessaryTables": [
+    {
+      "table": "reviews",
+      "reason": "Empty and not actively used (Product reviews)",
+      "recommendation": "Can be dropped if feature not planned"
+    },
+    {
+      "table": "addresses",
+      "reason": "Empty and not actively used (Saved addresses)",
+      "recommendation": "Can be dropped if feature not planned"
+    },
+    {
+      "table": "coupons",
+      "reason": "Empty and not actively used (Discount coupons)",
+      "recommendation": "Can be dropped if feature not planned"
+    }
+  ],
+  "duplicateColumns": [],
+  "schemaErrors": [],
+  "fixes": []
+}

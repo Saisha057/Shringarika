@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Access Verification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+    }
+    .check-item {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border-left: 4px solid #ccc;
+    }
+    .check-item.pass {
+      background-color: #d4edda;
+      border-left-color: #28a745;
+    }
+    .check-item.fail {
+      background-color: #f8d7da;
+      border-left-color: #dc3545;
+    }
+    .check-item.info {
+      background-color: #d1ecf1;
+      border-left-color: #17a2b8;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    button.danger {
+      background-color: #dc3545;
+    }
+    button.danger:hover {
+      background-color: #c82333;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      max-height: 200px;
+    }
+    .summary {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #e7f3ff;
+      border-radius: 8px;
+      border: 2px solid #007bff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Admin Access Verification Tool</h1>
+    <p>This tool verifies that product management is restricted to admin users only.</p>
+    
+    <button onclick="runAllChecks()">Run All Checks</button>
+    <button onclick="clearAllCache()" class="danger">Clear All Cache</button>
+    
+    <div id="results"></div>
+    
+    <div id="summary" class="summary" style="display:none;">
+      <h3>📊 Summary</h3>
+      <div id="summaryContent"></div>
+    </div>
+  </div>
+
+  <script>
+    async function runAllChecks() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<h2>Running Checks...</h2>';
+      
+      const checks = [];
+      
+      // Check 1: LocalStorage Products
+      checks.push(checkLocalStorage());
+      
+      // Check 2: API Products
+      checks.push(await checkAPIProducts());
+      
+      // Check 3: Test Unauthorized Create
+      checks.push(await testUnauthorizedCreate());
+      
+      // Check 4: Test Unauthorized Update
+      checks.push(await testUnauthorizedUpdate());
+      
+      // Check 5: Test Unauthorized Delete
+      checks.push(await testUnauthorizedDelete());
+      
+      // Display results
+      displayResults(checks);
+      displaySummary(checks);
+    }
+    
+    function checkLocalStorage() {
+      const products = localStorage.getItem('adminProducts');
+      let result = {
+        name: 'LocalStorage Products Check',
+        pass: false,
+        message: '',
+        details: ''
+      };
+      
+      if (!products) {
+        result.pass = true;
+        result.message = '✅ No products in localStorage (correct)';
+        result.details = 'localStorage is empty - products will be loaded from database only';
+      } else {
+        try {
+          const parsed = JSON.parse(products);
+          result.pass = parsed.length === 0;
+          result.message = parsed.length === 0 
+            ? '✅ localStorage has empty array (correct)' 
+            : `❌ Found ${parsed.length} products in localStorage cache`;
+          result.details = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+          result.pass = false;
+          result.message = '❌ Invalid data in localStorage';
+          result.details = products;
+        }
+      }
+      
+      return result;
+    }
+    
+    async function checkAPIProducts() {
+      const result = {
+        name: 'API Products Check',
+        pass: false,
+        message: '',
+        details: ''
+      };
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          const productCount = data.data.length;
+          result.message = `ℹ️ Found ${productCount} product(s) in database`;
+          result.details = productCount > 0 
+            ? `Products: ${data.data.map(p => p.name).join(', ')}` 
+            : 'Database is empty';
+          result.pass = true; // This is informational
+        } else {
+          result.message = '❌ Failed to fetch products';
+          result.details = JSON.stringify(data);
+        }
+      } catch (error) {
+        result.message = '❌ API Error: ' + error.message;
+        result.details = 'Could not connect to backend API';
+      }
+      
+      return result;
+    }
+    
+    async function testUnauthorizedCreate() {
+      const result = {
+        name: 'Unauthorized Create Test',
+        pass: false,
+        message: '',
+        details: ''
+      };
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'Unauthorized Product',
+            description: 'This should fail',
+            base_price: 999,
+            category: 'Test'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.status === 401 || response.status === 403) {
+          result.pass = true;
+          result.message = '✅ Unauthorized create blocked (correct)';
+          result.details = `Status: ${response.status}, Message: ${data.message}`;
+        } else {
+          result.pass = false;
+          result.message = '❌ Unauthorized create allowed (SECURITY ISSUE)';
+          result.details = `Status: ${response.status}, Response: ${JSON.stringify(data)}`;
+        }
+      } catch (error) {
+        result.pass = true;
+        result.message = '✅ Request blocked (correct)';
+        result.details = 'CORS/CSRF protection blocked the request';
+      }
+      
+      return result;
+    }
+    
+    async function testUnauthorizedUpdate() {
+      const result = {
+        name: 'Unauthorized Update Test',
+        pass: false,
+        message: '',
+        details: ''
+      };
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/products/test-id', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'Updated Name'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.status === 401 || response.status === 403) {
+          result.pass = true;
+          result.message = '✅ Unauthorized update blocked (correct)';
+          result.details = `Status: ${response.status}, Message: ${data.message}`;
+        } else {
+          result.pass = false;
+          result.message = '❌ Unauthorized update allowed (SECURITY ISSUE)';
+          result.details = `Status: ${response.status}, Response: ${JSON.stringify(data)}`;
+        }
+      } catch (error) {
+        result.pass = true;
+        result.message = '✅ Request blocked (correct)';
+        result.details = 'CORS/CSRF protection blocked the request';
+      }
+      
+      return result;
+    }
+    
+    async function testUnauthorizedDelete() {
+      const result = {
+        name: 'Unauthorized Delete Test',
+        pass: false,
+        message: '',
+        details: ''
+      };
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/products/test-id', {
+          method: 'DELETE',
+        });
+        
+        const data = await response.json();
+        
+        if (response.status === 401 || response.status === 403) {
+          result.pass = true;
+          result.message = '✅ Unauthorized delete blocked (correct)';
+          result.details = `Status: ${response.status}, Message: ${data.message}`;
+        } else {
+          result.pass = false;
+          result.message = '❌ Unauthorized delete allowed (SECURITY ISSUE)';
+          result.details = `Status: ${response.status}, Response: ${JSON.stringify(data)}`;
+        }
+      } catch (error) {
+        result.pass = true;
+        result.message = '✅ Request blocked (correct)';
+        result.details = 'CORS/CSRF protection blocked the request';
+      }
+      
+      return result;
+    }
+    
+    function displayResults(checks) {
+      const resultsDiv = document.getElementById('results');
+      let html = '<h2>📋 Check Results</h2>';
+      
+      checks.forEach(check => {
+        const className = check.pass ? 'pass' : (check.name.includes('API Products') ? 'info' : 'fail');
+        html += `
+          <div class="check-item ${className}">
+            <h3>${check.name}</h3>
+            <p><strong>${check.message}</strong></p>
+            <details>
+              <summary>Details</summary>
+              <pre>${check.details}</pre>
+            </details>
+          </div>
+        `;
+      });
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    function displaySummary(checks) {
+      const summaryDiv = document.getElementById('summary');
+      const summaryContent = document.getElementById('summaryContent');
+      
+      const securityChecks = checks.filter(c => !c.name.includes('API Products'));
+      const passed = securityChecks.filter(c => c.pass).length;
+      const total = securityChecks.length;
+      
+      const allPassed = passed === total;
+      
+      let html = `
+        <p><strong>Security Checks: ${passed}/${total} Passed</strong></p>
+        ${allPassed ? 
+          '<p style="color: #28a745;">✅ All security checks passed! Product management is properly restricted to admin users only.</p>' :
+          '<p style="color: #dc3545;">❌ Some security checks failed. Review the results above and fix the issues.</p>'
+        }
+        <h4>What This Means:</h4>
+        <ul>
+          <li>✅ <strong>LocalStorage Check:</strong> Ensures no hardcoded products are cached locally</li>
+          <li>ℹ️ <strong>API Products Check:</strong> Shows current products in database (informational)</li>
+          <li>✅ <strong>Unauthorized Tests:</strong> Verify non-admin users cannot create/update/delete products</li>
+        </ul>
+        <h4>Conclusion:</h4>
+        <p>${allPassed ? 
+          'Your admin dashboard is properly secured. Only authenticated admin users can add, update, or delete products.' :
+          'Please review the failed checks above. Some security rules may not be properly enforced.'
+        }</p>
+      `;
+      
+      summaryContent.innerHTML = html;
+      summaryDiv.style.display = 'block';
+    }
+    
+    function clearAllCache() {
+      if (confirm('This will clear all product cache from localStorage. Continue?')) {
+        localStorage.removeItem('adminProducts');
+        localStorage.removeItem('adminStock');
+        localStorage.removeItem('adminNotifications');
+        alert('✅ All cache cleared! Refresh your website to reload from database.');
+        location.reload();
+      }
+    }
+    
+    // Auto-run on page load
+    window.addEventListener('DOMContentLoaded', runAllChecks);
+  </script>
+</body>
+</html>

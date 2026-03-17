@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Authentication Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4F46E5;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #10B981;
+            color: white;
+        }
+        .error {
+            background: #EF4444;
+            color: white;
+        }
+        .warning {
+            background: #F59E0B;
+            color: white;
+        }
+        .info {
+            background: #3B82F6;
+            color: white;
+        }
+        .token-display {
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 4px solid #4F46E5;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #4338CA;
+        }
+        .danger-btn {
+            background: #EF4444;
+        }
+        .danger-btn:hover {
+            background: #DC2626;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Authentication Checker</h1>
+        
+        <div id="authStatus"></div>
+        
+        <h2>🔍 Current Status</h2>
+        <div id="tokenInfo"></div>
+        
+        <h2>🛠️ Actions</h2>
+        <button onclick="checkAuth()">🔄 Refresh Status</button>
+        <button onclick="goToLogin()">🔑 Go to Admin Login</button>
+        <button onclick="clearAuth()" class="danger-btn">🗑️ Clear All Auth Data</button>
+        
+        <h2>📋 Quick Fixes</h2>
+        <div class="info status">
+            <strong>If you see "No token found":</strong><br>
+            1. Click "Go to Admin Login"<br>
+            2. Login with admin credentials<br>
+            3. Come back here and click "Refresh Status"
+        </div>
+        
+        <div class="warning status">
+            <strong>If token exists but still getting 401 errors:</strong><br>
+            1. Click "Clear All Auth Data"<br>
+            2. Go to Admin Login<br>
+            3. Login again with fresh credentials
+        </div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            const authToken = localStorage.getItem('authToken');
+            const adminToken = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            const authStatusDiv = document.getElementById('authStatus');
+            const tokenInfoDiv = document.getElementById('tokenInfo');
+            
+            let statusHTML = '';
+            let tokenHTML = '';
+            
+            // Check which token exists
+            const activeToken = authToken || adminToken || token;
+            
+            if (activeToken) {
+                statusHTML = '<div class="success status">✅ TOKEN FOUND - Admin is authenticated!</div>';
+                
+                tokenHTML += '<p><strong>Token Location:</strong></p>';
+                if (authToken) tokenHTML += '<div class="token-display">authToken: ' + authToken.substring(0, 50) + '...</div>';
+                if (adminToken) tokenHTML += '<div class="token-display">adminToken: ' + adminToken.substring(0, 50) + '...</div>';
+                if (token) tokenHTML += '<div class="token-display">token: ' + token.substring(0, 50) + '...</div>';
+                
+                // Parse user data
+                if (user) {
+                    try {
+                        const userData = JSON.parse(user);
+                        tokenHTML += '<p><strong>User Info:</strong></p>';
+                        tokenHTML += '<div class="token-display">';
+                        tokenHTML += 'Email: ' + (userData.email || 'N/A') + '<br>';
+                        tokenHTML += 'Role: ' + (userData.role || 'N/A') + '<br>';
+                        tokenHTML += 'Name: ' + (userData.name || 'N/A');
+                        tokenHTML += '</div>';
+                        
+                        if (userData.role !== 'admin') {
+                            statusHTML += '<div class="warning status">⚠️ WARNING: User role is not "admin"!</div>';
+                        }
+                    } catch (e) {
+                        tokenHTML += '<div class="error status">❌ Failed to parse user data</div>';
+                    }
+                } else {
+                    tokenHTML += '<div class="warning status">⚠️ No user data found in localStorage</div>';
+                }
+                
+            } else {
+                statusHTML = '<div class="error status">❌ NO TOKEN FOUND - Admin is NOT logged in!</div>';
+                tokenHTML = '<p>No authentication tokens found in localStorage.</p>';
+                tokenHTML += '<p><strong>Action Required:</strong> Admin needs to login at <code>/admin</code></p>';
+            }
+            
+            // Check all localStorage keys
+            tokenHTML += '<p><strong>All localStorage Keys:</strong></p>';
+            tokenHTML += '<div class="token-display">';
+            const keys = Object.keys(localStorage);
+            if (keys.length > 0) {
+                tokenHTML += keys.join(', ');
+            } else {
+                tokenHTML += 'No keys found';
+            }
+            tokenHTML += '</div>';
+            
+            authStatusDiv.innerHTML = statusHTML;
+            tokenInfoDiv.innerHTML = tokenHTML;
+        }
+        
+        function goToLogin() {
+            window.location.href = '/admin';
+        }
+        
+        function clearAuth() {
+            if (confirm('Are you sure you want to clear all authentication data?\n\nYou will need to login again.')) {
+                localStorage.clear();
+                alert('✅ All auth data cleared! Please login again.');
+                checkAuth();
+            }
+        }
+        
+        // Check auth on page load
+        checkAuth();
+    </script>
+</body>
+</html>

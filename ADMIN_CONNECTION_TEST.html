@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Connection Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .status.checking {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .status-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        .instructions {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        .code {
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Admin Dashboard Status</h1>
+        <p class="subtitle">Testing API connections...</p>
+        
+        <div id="backendStatus" class="status checking">
+            <span class="status-icon">⏳</span>
+            <span>Backend Server (port 5000)</span>
+        </div>
+        
+        <div id="tokenStatus" class="status checking">
+            <span class="status-icon">⏳</span>
+            <span>Auth Token</span>
+        </div>
+        
+        <div id="ordersStatus" class="status checking">
+            <span class="status-icon">⏳</span>
+            <span>Orders API (/api/admin/orders)</span>
+        </div>
+        
+        <div id="usersStatus" class="status checking">
+            <span class="status-icon">⏳</span>
+            <span>Users API (/api/admin/users)</span>
+        </div>
+        
+        <div id="dashboardStatus" class="status checking">
+            <span class="status-icon">⏳</span>
+            <span>Dashboard API (/api/admin/dashboard)</span>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="testConnections()">🧪 Run Tests</button>
+            <button class="btn-secondary" onclick="clearAndReload()">🔄 Clear & Reload</button>
+        </div>
+        
+        <div class="instructions">
+            <strong>✅ What to do:</strong>
+            <ol>
+                <li>Click "🧪 Run Tests" to check your connections</li>
+                <li>If all tests pass ✅, you're ready to use the admin dashboard</li>
+                <li>If any test fails ❌, follow the fix steps below</li>
+            </ol>
+            
+            <strong style="display: block; margin-top: 15px;">❌ If tests fail:</strong>
+            <ol>
+                <li>Stop both servers (Ctrl+C)</li>
+                <li>Click "🔄 Clear & Reload" to clear cache</li>
+                <li>Restart backend: <span class="code">cd server && npm run dev</span></li>
+                <li>Restart frontend: <span class="code">npm run dev</span></li>
+                <li>Login again with your admin credentials</li>
+                <li>Click "🧪 Run Tests" again</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function updateStatus(elementId, isSuccess, message) {
+            const el = document.getElementById(elementId);
+            el.classList.remove('checking', 'success', 'error');
+            el.classList.add(isSuccess ? 'success' : 'error');
+            el.innerHTML = `<span class="status-icon">${isSuccess ? '✅' : '❌'}</span><span>${message}</span>`;
+        }
+
+        async function testConnections() {
+            // Test backend
+            try {
+                const backendRes = await fetch('http://localhost:5000/health');
+                if (backendRes.ok) {
+                    await updateStatus('backendStatus', true, 'Backend Server (port 5000) - Connected ✓');
+                } else {
+                    await updateStatus('backendStatus', false, 'Backend Server (port 5000) - Not responding');
+                    return;
+                }
+            } catch (e) {
+                await updateStatus('backendStatus', false, 'Backend Server (port 5000) - Not running');
+                return;
+            }
+
+            // Check token
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                await updateStatus('tokenStatus', true, 'Auth Token - Found ✓');
+            } else {
+                await updateStatus('tokenStatus', false, 'Auth Token - Not found (login first)');
+                return;
+            }
+
+            // Test admin endpoints
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+
+            try {
+                const ordersRes = await fetch('/api/admin/orders', { headers });
+                await updateStatus('ordersStatus', ordersRes.ok, 
+                    `Orders API - ${ordersRes.ok ? 'Connected ✓' : 'Failed: ' + ordersRes.status}`);
+            } catch (e) {
+                await updateStatus('ordersStatus', false, 'Orders API - Error');
+            }
+
+            try {
+                const usersRes = await fetch('/api/admin/users', { headers });
+                await updateStatus('usersStatus', usersRes.ok, 
+                    `Users API - ${usersRes.ok ? 'Connected ✓' : 'Failed: ' + usersRes.status}`);
+            } catch (e) {
+                await updateStatus('usersStatus', false, 'Users API - Error');
+            }
+
+            try {
+                const dashRes = await fetch('/api/admin/dashboard', { headers });
+                await updateStatus('dashboardStatus', dashRes.ok, 
+                    `Dashboard API - ${dashRes.ok ? 'Connected ✓' : 'Failed: ' + dashRes.status}`);
+            } catch (e) {
+                await updateStatus('dashboardStatus', false, 'Dashboard API - Error');
+            }
+        }
+
+        function clearAndReload() {
+            if (confirm('This will clear all cache and reload the page. Continue?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('Cache cleared. Page will reload...');
+                location.reload();
+            }
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(testConnections, 1000);
+        });
+    </script>
+</body>
+</html>

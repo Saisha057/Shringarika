@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Test Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .success {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        #log {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+        .log-success { color: #4CAF50; }
+        .log-error { color: #f44336; }
+        .log-info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Create Test Orders for Analytics</h1>
+        
+        <p><strong>Purpose:</strong> This will create 5 sample orders in your database so analytics can display data.</p>
+        
+        <button id="createBtn" onclick="createTestOrders()">Create 5 Test Orders</button>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+        const btn = document.getElementById('createBtn');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = `log-${type}`;
+            line.textContent = `[${timestamp}] ${message}`;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function createTestOrders() {
+            btn.disabled = true;
+            logEl.innerHTML = '';
+            statusEl.style.display = 'none';
+            
+            log('🔄 Starting order creation...', 'info');
+
+            try {
+                // Fetch products
+                log('📦 Fetching products...', 'info');
+                const productsResponse = await fetch('/api/products');
+                const productsData = await productsResponse.json();
+                const products = productsData.data || productsData;
+
+                if (!products || products.length === 0) {
+                    throw new Error('No products found in database');
+                }
+
+                log(`✅ Found ${products.length} products`, 'success');
+                log('', 'info');
+
+                // Create orders
+                let successCount = 0;
+                for (let i = 0; i < 5; i++) {
+                    const product = products[i % products.length];
+                    const quantity = Math.floor(Math.random() * 3) + 1;
+                    const total = quantity * parseFloat(product.price);
+
+                    log(`🛒 Creating order ${i + 1}/5...`, 'info');
+                    log(`   Product: ${product.name}`, 'info');
+                    log(`   Quantity: ${quantity} units`, 'info');
+                    log(`   Total: ₹${total}`, 'info');
+
+                    const orderData = {
+                        customerInfo: {
+                            name: `Test Customer ${i + 1}`,
+                            email: `test${i + 1}@example.com`,
+                            phone: `98765432${10 + i}`,
+                        },
+                        shippingAddress: {
+                            street: `${100 + i} Test Street`,
+                            city: 'Mumbai',
+                            state: 'Maharashtra',
+                            pincode: '400001',
+                            country: 'India',
+                        },
+                        items: [
+                            {
+                                productId: product.id,
+                                productName: product.name,
+                                quantity: quantity,
+                                pricePerItem: parseFloat(product.price),
+                                lineTotal: total,
+                                variant: {},
+                            },
+                        ],
+                        totalPrice: total,
+                        paymentMethod: i % 2 === 0 ? 'razorpay' : 'COD',
+                    };
+
+                    try {
+                        const response = await fetch('/api/orders', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(orderData),
+                        });
+
+                        const data = await response.json();
+
+                        if (data.status === 'success') {
+                            const order = data.data;
+                            log(`✅ Order created: ${order.order_number}`, 'success');
+                            successCount++;
+                        } else {
+                            log(`❌ Failed: ${data.message}`, 'error');
+                        }
+                    } catch (err) {
+                        log(`❌ Error: ${err.message}`, 'error');
+                    }
+
+                    log('', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+
+                // Summary
+                log('━'.repeat(50), 'info');
+                log(`\n📊 SUMMARY:`, 'info');
+                log(`   ✅ ${successCount}/5 orders created successfully`, successCount === 5 ? 'success' : 'error');
+                log(`\n🎯 Next step:`, 'info');
+                log(`   Go to Admin Dashboard → Analytics tab`, 'info');
+                log(`   Analytics should now show data!`, 'success');
+
+                if (successCount > 0) {
+                    statusEl.className = 'status success';
+                    statusEl.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        Created ${successCount} test orders.<br>
+                        <a href="/admin">Go to Admin Dashboard →</a>
+                    `;
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.innerHTML = `
+                        <strong>❌ Failed</strong><br>
+                        Could not create orders. Check console for errors.
+                    `;
+                }
+                statusEl.style.display = 'block';
+
+            } catch (error) {
+                log(`❌ Fatal error: ${error.message}`, 'error');
+                statusEl.className = 'status error';
+                statusEl.textContent = `Error: ${error.message}`;
+                statusEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        log('✅ Ready to create test orders', 'success');
+        log('📝 Click the button above to start', 'info');
+    </script>
+</body>
+</html>

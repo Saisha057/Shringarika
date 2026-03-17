@@ -1,0 +1,159 @@
+✅ Twilio SMS service initialized in LIVE MODE
+✅ Twilio SMS/WhatsApp service initialized
+⚠️  Push notifications disabled (missing Firebase credentials)
+⚠️  WhatsApp messaging disabled (missing credentials)
+✅ Environment variables loaded
+✅ PORT: 5000
+✅ NODE_ENV: development
+✅ SUPABASE_URL: https://srdljxbumxkgjxoqqrzs.supabase.co
+✅ Initializing Supabase with URL: https://srdljxbumxkgjxoqqrzs.supabase.co
+✅ Supabase initialized successfully
+✅ Response compression enabled
+✅ Rate limiting enabled
+✅ Input sanitization enabled
+✅ CSRF protection enabled
+✅ Session tracking enabled
+🚀 Server running in development mode on port 5000
+📡 Health check: http://localhost:5000/health
+📡 API Base URL: http://localhost:5000/api
+✅ Supabase configured (will test on first API call)
+✅ Socket.io chat service initialized
+✅ Socket.io chat service initialized
+⚠️  Redis not configured - caching disabled
+✅ Database connection pool created (min: 2, max: 10)
+
+🚀 === PERFORMANCE & SECURITY & COMMUNICATIONS & ADMIN === 🚀
+✅ Response Compression: Enabled
+✅ Rate Limiting: Enabled
+✅ Security Headers (Helmet): Enabled
+✅ CSRF Protection: Enabled
+✅ Input Sanitization (XSS/SQL): Enabled
+✅ Two-Factor Authentication: Available
+✅ API Key Management: Available
+✅ Session Tracking: Enabled
+✅ Database Connection Pool: Enabled
+⚠️  Redis Caching: Disabled (set REDIS_URL)
+⚠️  CDN: Disabled (set USE_CDN=true)
+⚠️  reCAPTCHA: Disabled (set RECAPTCHA_SECRET_KEY)
+✅ Image Optimization: Enabled (Cloudinary)
+✅ Email Service: Enabled (Gmail SMTP)
+✅ SMS Service: Enabled (Twilio)
+⚠️  Push Notifications: Disabled (set FIREBASE credentials)
+⚠️  WhatsApp Service: Disabled (set TWILIO_WHATSAPP_NUMBER)
+✅ Real-time Chat: Enabled (Socket.io)
+✅ Advanced Analytics: Enabled
+✅ Bulk Operations: Enabled
+✅ Audit Logs: Enabled
+✅ RBAC: Enabled
+✅ Backup System: Enabled
+✅ Export System: Enabled (CSV/PDF)
+✅ Scheduled Tasks (Cron): Enabled
+==========================================
+
+
+🕐 === INITIALIZING CRON JOBS === 🕐
+✅ Daily Sales Report: Scheduled (9 AM daily)
+✅ Weekly Analytics: Scheduled (Monday 9 AM)
+✅ Monthly Backup: Scheduled (1st day, 2 AM)
+✅ Abandoned Cart Reminders: Scheduled (Every 6 hours)
+✅ Low Stock Alerts: Scheduled (10 AM daily)
+✅ Audit Logs Cleanup: Scheduled (Sunday 3 AM)
+✅ Exports Cleanup: Scheduled (4 AM daily)
+✅ Backups Cleanup: Scheduled (Sunday 4 AM)
+✅ Order Status Updates: Scheduled (Every hour)
+
+✅ Total Cron Jobs Initialized: 9
+==========================================
+
+✅ [EventBus] orderEventService initialized — listening for:
+   ORDER_CREATED | PAYMENT_SUCCESS | ORDER_STATUS_CHANGED
+   RETURN_APPROVED | REFUND_COMPLETED | LOW_STOCK
+   Admin SMS alerts → +918299103181
+✅ Event-driven notification system initialized
+[0mGET /api/returns [33m401[0m 10.458 ms - 81[0m
+[0mGET /api/products [32m200[0m 2666.983 ms - -[0m
+[0mGET /api/products [36m304[0m 1276.543 ms - -[0m
+[0mGET /api/returns [33m401[0m 2.298 ms - 81[0m
+[0mGET /api/products [36m304[0m 678.506 ms - -[0m
+[0mGET /api/products [36m304[0m 716.025 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.712 ms - 81[0m
+[0mGET /api/products [36m304[0m 265.541 ms - -[0m
+[0mGET /api/returns [33m401[0m 1.097 ms - 81[0m
+[0mGET /api/returns [33m401[0m 1.002 ms - 81[0m
+[0mGET /api/products [36m304[0m 294.712 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.579 ms - 81[0m
+[0mGET /api/products [36m304[0m 277.789 ms - -[0m
+[0mGET /api/products [36m304[0m 625.959 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.967 ms - 81[0m
+[0mGET /api/products [36m304[0m 395.529 ms - -[0m
+[0mGET /api/returns [33m401[0m 1.010 ms - 81[0m
+[0mGET /api/products [36m304[0m 475.282 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.578 ms - 81[0m
+[0mGET /api/products [36m304[0m 266.930 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.782 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.683 ms - 81[0m
+[0mGET /api/products [36m304[0m 843.743 ms - -[0m
+[0mGET /api/products [36m304[0m 997.533 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.638 ms - 81[0m
+[0mGET /api/products [36m304[0m 508.972 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.662 ms - 81[0m
+[0mGET /api/products [36m304[0m 638.173 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.801 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.559 ms - 81[0m
+[0mGET /api/products [36m304[0m 1142.818 ms - -[0m
+[0mGET /api/products [36m304[0m 557.409 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.633 ms - 81[0m
+[0mGET /api/products [36m304[0m 439.212 ms - -[0m
+[0mGET /api/returns [33m401[0m 1.149 ms - 81[0m
+[0mGET /api/products [36m304[0m 348.290 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.575 ms - 81[0m
+[0mGET /api/products [36m304[0m 269.240 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.712 ms - 81[0m
+[0mGET /api/products [36m304[0m 422.329 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.570 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.553 ms - 81[0m
+[0mGET /api/products [36m304[0m 680.195 ms - -[0m
+[0mGET /api/products [36m304[0m 474.697 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.626 ms - 81[0m
+[0mGET /api/products [36m304[0m 217.427 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.676 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.292 ms - 81[0m
+[0mGET /api/products [36m304[0m 208.943 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.423 ms - 81[0m
+[0mGET /api/products [36m304[0m 259.186 ms - -[0m
+[0mGET /api/products [36m304[0m 202.970 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.800 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.483 ms - 81[0m
+[0mGET /api/products [36m304[0m 508.947 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.450 ms - 81[0m
+[0mGET /api/products [36m304[0m 656.642 ms - -[0m
+[0mGET /api/products [36m304[0m 468.348 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.744 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.402 ms - 81[0m
+[0mGET /api/products [36m304[0m 813.024 ms - -[0m
+[0mGET /api/products [36m304[0m 498.825 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.594 ms - 81[0m
+[0mGET /api/products [36m304[0m 517.891 ms - -[0m
+[0mGET /api/returns [33m401[0m 1.572 ms - 81[0m
+[0mGET /api/products [36m304[0m 356.328 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.819 ms - 81[0m
+[0mGET /api/products [36m304[0m 245.206 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.626 ms - 81[0m
+[0mGET /api/products [36m304[0m 435.769 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.520 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.465 ms - 81[0m
+[0mGET /api/products [36m304[0m 504.913 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.409 ms - 81[0m
+[0mGET /api/products [36m304[0m 423.898 ms - -[0m
+[0mGET /api/products [36m304[0m 512.580 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.666 ms - 81[0m
+[0mGET /api/products [36m304[0m 485.852 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.795 ms - 81[0m
+[0mGET /api/returns [33m401[0m 0.392 ms - 81[0m
+[0mGET /api/products [36m304[0m 475.993 ms - -[0m
+[0mGET /api/products [36m304[0m 187.463 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.403 ms - 81[0m
+[0mGET /api/products [36m304[0m 225.762 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.431 ms - 81[0m
+[0mGET /api/products [36m304[0m 153.864 ms - -[0m
+[0mGET /api/returns [33m401[0m 0.678 ms - 81[0m

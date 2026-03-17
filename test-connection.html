@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Connection Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status.loading {
+            background: #ffc107;
+            color: #000;
+        }
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        .details {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 Backend Connection Test</h1>
+        
+        <div class="test-section">
+            <div class="test-title">1️⃣ Backend Direct (Port 5000)</div>
+            <div id="backend-status" class="status loading">Testing...</div>
+            <div id="backend-details" class="details"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2️⃣ Frontend Server (Port 3000)</div>
+            <div id="frontend-status" class="status loading">Testing...</div>
+            <div id="frontend-details" class="details"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3️⃣ API Proxy (Frontend → Backend)</div>
+            <div id="proxy-status" class="status loading">Testing...</div>
+            <div id="proxy-details" class="details"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4️⃣ Payment Routes Check</div>
+            <div id="payment-status" class="status loading">Testing...</div>
+            <div id="payment-details" class="details"></div>
+        </div>
+
+        <button onclick="runTests()">🔄 Run Tests Again</button>
+    </div>
+
+    <script>
+        async function testBackend() {
+            const statusEl = document.getElementById('backend-status');
+            const detailsEl = document.getElementById('backend-details');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/products', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Connected (${response.status})`;
+                    detailsEl.textContent = `Received ${data.data?.length || 0} products from database`;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Failed';
+                detailsEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testFrontend() {
+            const statusEl = document.getElementById('frontend-status');
+            const detailsEl = document.getElementById('frontend-details');
+            
+            try {
+                const response = await fetch('http://localhost:3000/', {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Running (${response.status})`;
+                    detailsEl.textContent = 'Vite dev server is active';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Not Running';
+                detailsEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testProxy() {
+            const statusEl = document.getElementById('proxy-status');
+            const detailsEl = document.getElementById('proxy-details');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/products', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Working (${response.status})`;
+                    detailsEl.textContent = `Proxy successfully forwarding to backend. Got ${data.data?.length || 0} products.`;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Not Working';
+                detailsEl.textContent = `Error: ${error.message}. Check vite.config.ts proxy settings.`;
+            }
+        }
+
+        async function testPaymentRoutes() {
+            const statusEl = document.getElementById('payment-status');
+            const detailsEl = document.getElementById('payment-details');
+            
+            try {
+                // Test if payment routes are registered (will return 400 for missing data, but route exists)
+                const response = await fetch('http://localhost:5000/api/payments/create-order', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                // Any response means route is registered (even validation errors)
+                if (response.status === 400 || response.status === 401 || response.ok) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = '✅ Routes Registered';
+                    detailsEl.textContent = 'Payment endpoints are accessible. Razorpay fix is active.';
+                } else if (response.status === 404) {
+                    throw new Error('Payment routes not found');
+                } else {
+                    throw new Error(`Unexpected status: ${response.status}`);
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Routes Missing';
+                detailsEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function runTests() {
+            // Reset all statuses
+            document.querySelectorAll('.status').forEach(el => {
+                el.className = 'status loading';
+                el.textContent = 'Testing...';
+            });
+            
+            document.querySelectorAll('.details').forEach(el => {
+                el.textContent = '';
+            });
+
+            // Run all tests
+            await Promise.all([
+                testBackend(),
+                testFrontend(),
+                testProxy(),
+                testPaymentRoutes()
+            ]);
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>

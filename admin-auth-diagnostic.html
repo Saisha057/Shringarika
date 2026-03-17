@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Auth Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.good {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        .btn-info {
+            background: #2196F3;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        pre {
+            background: #282c34;
+            color: #61dafb;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Authentication Diagnostic Tool</h1>
+        
+        <div class="section">
+            <h2>Current Session Status</h2>
+            <div id="sessionStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>Available Tokens</h2>
+            <div id="tokenStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>User Information</h2>
+            <div id="userInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>Diagnosis</h2>
+            <div id="diagnosis"></div>
+        </div>
+
+        <div class="section">
+            <h2>Actions</h2>
+            <button class="btn-info" onclick="runDiagnostic()">🔄 Re-run Diagnostic</button>
+            <button class="btn-danger" onclick="clearAndReload()">🗑️ Clear localStorage & Reload</button>
+            <button class="btn-primary" onclick="window.location.href='http://localhost:3000'">🏠 Go to Homepage</button>
+        </div>
+
+        <div class="section">
+            <h2>Manual Fix Instructions</h2>
+            <ol>
+                <li>Click the <strong>"Clear localStorage & Reload"</strong> button above</li>
+                <li>Go to <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+                <li>Log in with your admin credentials: <span class="code">shringarika11@gmail.com</span></li>
+                <li>After login, return to this page and click <strong>"Re-run Diagnostic"</strong></li>
+                <li>Verify that <strong>"adminToken"</strong> now exists in localStorage</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function runDiagnostic() {
+            const adminToken = localStorage.getItem('adminToken');
+            const authToken = localStorage.getItem('authToken');
+            const userStr = localStorage.getItem('user');
+            let user = null;
+            
+            try {
+                user = userStr ? JSON.parse(userStr) : null;
+            } catch (e) {
+                console.error('Failed to parse user:', e);
+            }
+
+            // Session Status
+            let sessionHtml = '';
+            if (adminToken && authToken && user && user.role === 'admin') {
+                sessionHtml = '<div class="status good">✅ FULLY AUTHENTICATED - Admin session is valid</div>';
+            } else if (authToken && user && user.role === 'admin') {
+                sessionHtml = '<div class="status warning">⚠️ PARTIALLY AUTHENTICATED - Admin user found but adminToken missing</div>';
+            } else if (authToken && user) {
+                sessionHtml = '<div class="status error">❌ NOT AN ADMIN - You are logged in as: ' + user.role + '</div>';
+            } else {
+                sessionHtml = '<div class="status error">❌ NOT AUTHENTICATED - No valid session found</div>';
+            }
+            document.getElementById('sessionStatus').innerHTML = sessionHtml;
+
+            // Token Status
+            let tokenHtml = '';
+            tokenHtml += '<p><strong>adminToken:</strong> ' + (adminToken ? `<span class="status good">✅ EXISTS (${adminToken.length} chars)</span>` : '<span class="status error">❌ MISSING</span>') + '</p>';
+            tokenHtml += '<p><strong>authToken:</strong> ' + (authToken ? `<span class="status good">✅ EXISTS (${authToken.length} chars)</span>` : '<span class="status error">❌ MISSING</span>') + '</p>';
+            
+            if (adminToken) {
+                tokenHtml += '<pre>' + adminToken.substring(0, 50) + '...</pre>';
+            }
+            document.getElementById('tokenStatus').innerHTML = tokenHtml;
+
+            // User Info
+            let userHtml = '';
+            if (user) {
+                userHtml += '<p><strong>Name:</strong> ' + (user.name || 'N/A') + '</p>';
+                userHtml += '<p><strong>Email:</strong> ' + (user.email || 'N/A') + '</p>';
+                userHtml += '<p><strong>Role:</strong> ' + (user.role === 'admin' ? '<span class="status good">✅ admin</span>' : '<span class="status error">❌ ' + user.role + '</span>') + '</p>';
+                userHtml += '<p><strong>ID:</strong> <span class="code">' + (user.id || 'N/A') + '</span></p>';
+            } else {
+                userHtml = '<div class="status error">❌ No user information found in localStorage</div>';
+            }
+            document.getElementById('userInfo').innerHTML = userHtml;
+
+            // Diagnosis
+            let diagnosisHtml = '';
+            if (!adminToken && !authToken) {
+                diagnosisHtml = `
+                    <div class="status error">
+                        <h3>🔴 CRITICAL: No authentication tokens found</h3>
+                        <p><strong>Cause:</strong> You are not logged in</p>
+                        <p><strong>Solution:</strong> Go to <a href="http://localhost:3000">http://localhost:3000</a> and log in</p>
+                    </div>
+                `;
+            } else if (!adminToken && authToken && user && user.role === 'admin') {
+                diagnosisHtml = `
+                    <div class="status warning">
+                        <h3>🟡 WARNING: Admin token missing</h3>
+                        <p><strong>Cause:</strong> You logged in BEFORE the admin token fix was applied</p>
+                        <p><strong>Impact:</strong> Admin API calls (like fetching orders) will receive 401 Unauthorized</p>
+                        <p><strong>Solution:</strong></p>
+                        <ol>
+                            <li>Click "Clear localStorage & Reload" button above</li>
+                            <li>Log in again with admin credentials</li>
+                            <li>Run this diagnostic again to verify adminToken now exists</li>
+                        </ol>
+                    </div>
+                `;
+            } else if (authToken && user && user.role !== 'admin') {
+                diagnosisHtml = `
+                    <div class="status error">
+                        <h3>🔴 ERROR: Not an admin user</h3>
+                        <p><strong>Cause:</strong> Your account role is "${user.role}", not "admin"</p>
+                        <p><strong>Solution:</strong> Contact system administrator to update your role in the database</p>
+                        <p><strong>SQL to run:</strong></p>
+                        <pre>UPDATE users SET role = 'admin' WHERE email = '${user.email}';</pre>
+                    </div>
+                `;
+            } else if (adminToken && authToken && user && user.role === 'admin') {
+                diagnosisHtml = `
+                    <div class="status good">
+                        <h3>🟢 SUCCESS: All authentication checks passed!</h3>
+                        <p><strong>Status:</strong> You are fully authenticated as an admin</p>
+                        <p><strong>Tokens:</strong> Both adminToken and authToken are present</p>
+                        <p><strong>Role:</strong> Verified as "admin"</p>
+                        <p><strong>Next Steps:</strong> You can now access all admin features</p>
+                        <p><a href="http://localhost:3000/admin" class="btn-primary" style="display:inline-block; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">Go to Admin Dashboard</a></p>
+                    </div>
+                `;
+            }
+            document.getElementById('diagnosis').innerHTML = diagnosisHtml;
+        }
+
+        function clearAndReload() {
+            if (confirm('This will clear ALL localStorage data and reload the page. Continue?')) {
+                console.log('🗑️ Clearing localStorage...');
+                localStorage.clear();
+                console.log('✅ localStorage cleared');
+                alert('localStorage cleared! The page will now reload.');
+                window.location.reload();
+            }
+        }
+
+        // Run diagnostic on page load
+        runDiagnostic();
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+{
+  "tables": [
+    {
+      "name": "users",
+      "exists": true,
+      "rowCount": 7,
+      "classification": "PENDING"
+    },
+    {
+      "name": "products",
+      "exists": true,
+      "rowCount": 4,
+      "classification": "PENDING"
+    },
+    {
+      "name": "orders",
+      "exists": true,
+      "rowCount": 28,
+      "classification": "PENDING"
+    },
+    {
+      "name": "order_items",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "product_variants",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "carts",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "cart_items",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "reviews",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "wishlists",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "wishlist_items",
+      "exists": true,
+      "rowCount": null,
+      "classification": "PENDING"
+    },
+    {
+      "name": "categories",
+      "exists": true,
+      "rowCount": 14,
+      "classification": "PENDING"
+    },
+    {
+      "name": "coupons",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "addresses",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "notifications",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "support_tickets",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "support_messages",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "stock_history",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "analytics_events",
+      "exists": true,
+      "rowCount": null,
+      "classification": "PENDING"
+    },
+    {
+      "name": "sessions",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "api_keys",
+      "exists": true,
+      "rowCount": null,
+      "classification": "PENDING"
+    },
+    {
+      "name": "audit_logs",
+      "exists": true,
+      "rowCount": 0,
+      "classification": "PENDING"
+    },
+    {
+      "name": "exports",
+      "exists": true,
+      "rowCount": null,
+      "classification": "PENDING"
+    },
+    {
+      "name": "backups",
+      "exists": true,
+      "rowCount": null,
+      "classification": "PENDING"
+    }
+  ],
+  "functions": [],
+  "triggers": [],
+  "foreignKeys": [],
+  "constraints": [],
+  "policies": [],
+  "problems": [
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "a4a314e1-c68d-4eb6-a82c-5bf008295341",
+      "orderNumber": "ORD-1766037876078-4N9EVVL7Y"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "8f1cd30a-4878-4978-a2e0-bfaa6bb7b899",
+      "orderNumber": "ORD-1765980951832-BVMD1XRXP"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "0a908418-d1ad-4c9b-a539-48db0ff46ca4",
+      "orderNumber": "ORD-1766239636205-GIXRY81O8"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "23d5e21a-3a17-49af-a853-03f7dc1a233e",
+      "orderNumber": "ORD-1766040838902-I01Z0MXA9"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "616aabd2-6213-4888-bfe3-9c6904942bab",
+      "orderNumber": "ORD-1765902330516-BRGDRC08I"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "2de7f63c-500f-4a52-a1b1-d82be397c35b",
+      "orderNumber": "ORD-1766326500668-OUHWC6BSY"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "277540d4-ba56-4b83-b490-a758d5681e0b",
+      "orderNumber": "ORD-20251213-001"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "d93569a0-908a-4047-9e50-f7f55b07afba",
+      "orderNumber": "ORD-1765886674249-J01GFNP42"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "9438b0dc-6d5a-4356-93a3-5b6be7796e81",
+      "orderNumber": "ORD-1766153320816-Q3132F6I2"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "081d4398-b897-4a3e-927e-6465ec36cb4f",
+      "orderNumber": "ORD-1765943855021-2MXCRCYIE"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "b73621fe-2cbf-47cb-8799-cdffa5fd5824",
+      "orderNumber": "ORD-1766152817591-2OJSLR8XJ"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "ab375585-bded-47f0-8508-b6c5c32e7750",
+      "orderNumber": "ORD-1765943234915-TCJR13F8Q"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "d6f7426b-a517-4812-b515-171d16659081",
+      "orderNumber": "ORD-1765899590419-E9JDQQ7XU"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "b77c2681-93cf-473b-a81a-047d58786141",
+      "orderNumber": "ORD-1766118881287-72JA9H40X"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "ac21567d-350f-4fa4-9d17-0eb1fb0731a4",
+      "orderNumber": "ORD-1766152927210-WJPAI1N4B"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "c0f30a43-acdb-4fd5-b7a7-58e36e11f0d4",
+      "orderNumber": "ORD-1766152166815-13JW202ND"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "b9d29ae1-5907-4124-81e3-6f18f3482069",
+      "orderNumber": "ORD-1765899612398-V298BPB7P"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "ce884918-cfe5-4fb0-9c05-101c50e137a1",
+      "orderNumber": "ORD-1766202057139-8F58BYCE9"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "4a617894-4e8e-4f04-9bb7-f2c17797cc5f",
+      "orderNumber": "ORD-1766115201783-KKOXTICOO"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "56f1b483-900e-4baa-8977-336bb9a7c215",
+      "orderNumber": "ORD-1766210752461-PEW27SDXE"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "8ac666e7-cd32-47d8-bbcc-b4909a780393",
+      "orderNumber": "ORD-1766151305466-HQAQKTDWN"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "3afe3583-e77b-4a38-8abe-6d2f6c06a1b7",
+      "orderNumber": "ORD-20251214-001"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "aa0208d2-50cd-40b7-99f4-49f07a98bc32",
+      "orderNumber": "ORD-1766116031376-MPA1TJUM6"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "53dcaae2-1fe6-4b73-8454-3bc832b0db00",
+      "orderNumber": "ORD-1766039037701-8I40SPQH6"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "744642e6-dd03-44a4-942c-f95dd06f6134",
+      "orderNumber": "ORD-1765976281481-VUY2MHMTH"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "d93083c8-9667-427a-8c2d-1417be45f5bd",
+      "orderNumber": "ORD-1765956577916-1SQS523YM"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "893bcb53-9d7b-40d2-9044-b591faaa6727",
+      "orderNumber": "ORD-1766073653971-YPSDWO44Y"
+    },
+    {
+      "type": "ORPHANED_ORDER",
+      "orderId": "a6ade1b2-5e0c-4d61-9d84-a31435db7f02",
+      "orderNumber": "ORD-20251210-001"
+    },
+    {
+      "type": "PRODUCT_NO_VARIANTS",
+      "productId": "bec196d0-4890-4763-a7bb-53ae5c6f7dad",
+      "productName": "AROHI COLLECTION"
+    },
+    {
+      "type": "PRODUCT_NO_VARIANTS",
+      "productId": "92c060fb-9a21-42c5-b092-7cb3a102d464",
+      "productName": "JYOTSANA WINTER COLLECTION"
+    },
+    {
+      "type": "PRODUCT_NO_VARIANTS",
+      "productId": "08f5018d-0cbd-4627-bbd6-39c74ba4ea6b",
+      "productName": "SAREE"
+    },
+    {
+      "type": "PRODUCT_NO_VARIANTS",
+      "productId": "c8fd27ae-3640-42c2-8188-3c2f8b8ad645",
+      "productName": "AROHI COLLECTION"
+    }
+  ],
+  "indexes": [],
+  "storage": []
+}
