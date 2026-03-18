@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, X, ChevronLeft, Star } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import { resolveImageUrl } from './OptimizedImage';
 
 interface SearchPageProps {
   onNavigateHome: () => void;
@@ -281,7 +282,7 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
                     <div className="relative bg-neutral-100 aspect-3/4 mb-3 overflow-hidden rounded-lg">
                       {(product.images && product.images.length > 0) || product.image ? (
                         <img 
-                          src={product.images?.[0] || product.image} 
+                          src={resolveImageUrl(product.images?.[0] || product.image || '')} 
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
@@ -331,7 +332,7 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
                 <div className="relative bg-neutral-100 aspect-3/4 mb-3 overflow-hidden rounded-lg">
                   {(product.images && product.images.length > 0) || product.image ? (
                     <img 
-                      src={product.images?.[0] || product.image} 
+                      src={resolveImageUrl(product.images?.[0] || product.image || '')} 
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />

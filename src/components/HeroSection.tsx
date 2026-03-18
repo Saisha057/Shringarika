@@ -59,7 +59,7 @@ export function HeroSection({ onViewShowroom }: HeroSectionProps) {
             <div className="sm:col-span-1">
               <div className="aspect-[3/4] relative bg-neutral-300 border border-neutral-400 rounded overflow-hidden">
                 <img
-                  src="/src/assets/pink and blue saree.jpeg"
+                  src="/images/pink and blue saree.jpeg"
                   alt="Pink and blue traditional saree"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -70,7 +70,7 @@ export function HeroSection({ onViewShowroom }: HeroSectionProps) {
             <div className="sm:col-span-1">
               <div className="aspect-[3/4] relative bg-neutral-300 border border-neutral-400 rounded overflow-hidden">
                 <img 
-                  src="/src/assets/royal red.jpeg" 
+                  src="/images/royal red.jpeg" 
                   alt="Royal red lehenga" 
                   className="absolute inset-0 w-full h-full object-cover" 
                 />

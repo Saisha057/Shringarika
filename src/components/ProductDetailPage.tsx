@@ -7,7 +7,7 @@ import { useAdmin } from "../context/AdminContext"
 import { useAuth } from "../context/AuthContext"
 import { RestockNotificationModal } from "./RestockNotificationModal"
 import { ProductReviews } from "./ProductReviews"
-import { ProductImage } from "./OptimizedImage"
+import { resolveImageUrl } from "./OptimizedImage"
 import { useRecentlyViewed } from "../hooks/useRecentlyViewed"
 import { SizeRecommendation } from "./SizeRecommendation"
 import { ShippingCalculator } from './ShippingCalculator';
@@ -335,7 +335,7 @@ export function ProductDetailPage({ productId, onNavigateBack }: ProductDetailPa
             <div className="w-full aspect-3/4 sm:aspect-3/4 md:aspect-4/5 bg-neutral-100 border border-neutral-300 rounded-sm overflow-hidden">
               {primaryImage ? (
                 <img 
-                  src={primaryImage} 
+                  src={resolveImageUrl(primaryImage)} 
                   alt={product.name}
                   className="w-full h-full object-contain object-center bg-white block p-2"
                   loading="eager"
@@ -359,7 +359,7 @@ export function ProductDetailPage({ productId, onNavigateBack }: ProductDetailPa
                     }`}
                   >
                     <img 
-                      src={image} 
+                      src={resolveImageUrl(image)} 
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-contain object-center bg-white block p-1"
                       loading={index === 0 ? "eager" : "lazy"}

@@ -7,6 +7,33 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const resolveImageUrl = (imageSrc: string): string => {
+  if (!imageSrc || imageSrc.trim() === '') {
+    return '';
+  }
+
+  if (
+    imageSrc.startsWith('http://') ||
+    imageSrc.startsWith('https://') ||
+    imageSrc.startsWith('data:') ||
+    imageSrc.startsWith('blob:')
+  ) {
+    return imageSrc;
+  }
+
+  const apiUrl = (import.meta.env.VITE_API_URL || '').trim();
+  if (!apiUrl) {
+    return imageSrc;
+  }
+
+  // VITE_API_URL may include /api for axios; images are typically served from app origin.
+  const baseOrigin = apiUrl.replace(/\/api\/?$/, '');
+  const cleanBase = baseOrigin.replace(/\/+$/, '');
+  const cleanPath = imageSrc.replace(/^\/+/, '');
+
+  return `${cleanBase}/${cleanPath}`;
+};
+
 interface OptimizedImageProps {
   src: string;
   alt: string;
@@ -102,11 +129,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       return '';
     }
 
-    // Check if it's already an external URL (http/https)
-    if (imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
-      return imageSrc;
-    }
-
     // Check if it's a data URI (base64 image)
     if (imageSrc.startsWith('data:')) {
       // Data URIs can be very large - don't try to transform them
@@ -114,9 +136,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       return imageSrc;
     }
 
-    // Check if it's a blob URL
-    if (imageSrc.startsWith('blob:')) {
-      return imageSrc;
+    const resolvedSrc = resolveImageUrl(imageSrc);
+
+    // External/finalized paths are returned as-is when CDN optimization is disabled.
+    if (!import.meta.env.VITE_CDN_URL) {
+      return resolvedSrc;
     }
 
     // Build transformation parameters for relative paths
@@ -137,8 +161,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // In production, this would point to your CDN/image optimization service
     const baseUrl = import.meta.env.VITE_CDN_URL || '';
     const queryString = params.toString();
-    
-    return queryString ? `${baseUrl}${imageSrc}?${queryString}` : `${baseUrl}${imageSrc}`;
+
+    return queryString ? `${baseUrl}${resolvedSrc}?${queryString}` : `${baseUrl}${resolvedSrc}`;
   };
 
   // Generate responsive srcset

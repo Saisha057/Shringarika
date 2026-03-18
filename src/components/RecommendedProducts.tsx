@@ -6,12 +6,12 @@ interface RecommendedProductsProps {
 
 export function RecommendedProducts({ onViewAll }: RecommendedProductsProps) {
   const products = [
-    { id: 1, image: '/src/assets/eyes.jpeg' },
-    { id: 2, image: '/src/assets/heels.jpeg' },
-    { id: 3, image: '/src/assets/field.jpeg' },
-    { id: 4, image: '/src/assets/two white.jpeg' },
-    { id: 5, image: '/src/assets/wedding red.jpeg' },
-    { id: 6, image: '/src/assets/male female.jpeg' },
+    { id: 1, image: '/images/eyes.jpeg' },
+    { id: 2, image: '/images/heels.jpeg' },
+    { id: 3, image: '/images/field.jpeg' },
+    { id: 4, image: '/images/two white.jpeg' },
+    { id: 5, image: '/images/wedding red.jpeg' },
+    { id: 6, image: '/images/male female.jpeg' },
   ];
 
   // Duplicate products for seamless loop
