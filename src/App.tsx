@@ -48,6 +48,34 @@ const PrivacyPolicyPage = lazy(() => import("./components/PrivacyPolicyPage").th
 const TermsOfServicePage = lazy(() => import("./components/TermsOfServicePage").then(m => ({ default: m.TermsOfServicePage })))
 const CookiePolicyPage = lazy(() => import("./components/CookiePolicyPage").then(m => ({ default: m.CookiePolicyPage })))
 
+const VALID_PAGES = new Set<string>([
+  "home",
+  "products",
+  "product-detail",
+  "cart",
+  "checkout",
+  "order-confirmation",
+  "search",
+  "about",
+  "contact",
+  "account",
+  "my-account-dashboard",
+  "orders",
+  "profile",
+  "address-book",
+  "wallet",
+  "wishlist",
+  "settings",
+  "shipping",
+  "faq",
+  "sustainability",
+  "reset-password",
+  "track-order",
+  "privacy-policy",
+  "terms-of-service",
+  "cookie-policy",
+]);
+
 // Loading component for lazy-loaded routes
 const PageLoader = () => (
   <div className="min-h-screen bg-white flex items-center justify-center">
@@ -106,6 +134,7 @@ function AppContent() {
     const savedPage = localStorage.getItem('currentPage') as typeof currentPage | null;
     return savedPage || "home";
   })
+
   // PERSISTENCE FIX: Restore selected product and order ID from localStorage
   const [selectedProductId, setSelectedProductId] = useState<number | null>(() => {
     const saved = localStorage.getItem('selectedProductId');
@@ -129,17 +158,20 @@ function AppContent() {
   // BROWSER HISTORY FIX: Enable browser back/forward buttons
   useEffect(() => {
     // Push state to history when page changes
-    window.history.pushState({ page: currentPage }, '', `#${currentPage}`);
+    const path = currentPage === "home" ? "/" : `/${currentPage}`;
+    if (window.location.pathname !== path) {
+      window.history.pushState({ page: currentPage }, '', path);
+    }
     
     // Handle browser back/forward buttons
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state && event.state.page) {
-        setCurrentPage(event.state.page);
+      if (event.state && event.state.page && VALID_PAGES.has(event.state.page)) {
+        setCurrentPage(event.state.page as typeof currentPage);
       } else {
-        // Parse hash from URL
-        const hash = window.location.hash.replace('#', '');
-        if (hash) {
-          setCurrentPage(hash as typeof currentPage);
+        // Parse clean URL path first
+        const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+        if (path && VALID_PAGES.has(path)) {
+          setCurrentPage(path as typeof currentPage);
         } else {
           setCurrentPage('home');
         }
@@ -149,6 +181,27 @@ function AppContent() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentPage]);
+
+  // INITIAL URL SYNC: support both legacy hash URLs and clean paths.
+  useEffect(() => {
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    const hash = window.location.hash.replace('#', '');
+    const initialRoute = path || hash;
+
+    if (initialRoute && VALID_PAGES.has(initialRoute)) {
+      setCurrentPage(initialRoute as typeof currentPage);
+
+      // Normalize legacy hash URLs to clean paths.
+      if (hash && !path) {
+        const cleanPath = initialRoute === 'home' ? '/' : `/${initialRoute}`;
+        window.history.replaceState({ page: initialRoute }, '', cleanPath);
+      }
+    } else {
+      setCurrentPage('home');
+      window.history.replaceState({ page: 'home' }, '', '/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // PERSISTENCE FIX: Save selected product ID to localStorage
   useEffect(() => {
@@ -454,7 +507,11 @@ function AppContent() {
 
         {currentPage === "product-detail" && selectedProductId && (
           <Suspense fallback={<PageLoader />}>
-            <ProductDetailPage productId={selectedProductId} onNavigateBack={handleNavigateToProducts} />
+            <ProductDetailPage
+              productId={selectedProductId}
+              onNavigateBack={handleNavigateToProducts}
+              onNavigateToCart={handleNavigateToCart}
+            />
           </Suspense>
         )}
 

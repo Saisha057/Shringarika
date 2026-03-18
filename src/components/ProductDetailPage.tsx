@@ -17,9 +17,10 @@ import { useVariantStock } from '../hooks/useVariantStock';
 interface ProductDetailPageProps {
   productId: number
   onNavigateBack: () => void
+  onNavigateToCart?: () => void
 }
 
-export function ProductDetailPage({ productId, onNavigateBack }: ProductDetailPageProps) {
+export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart }: ProductDetailPageProps) {
   const { products, getProductStock } = useAdmin()
   const product = products.find((p) => p.id === productId)
   const { addToCart, cart } = useCart()
@@ -609,7 +610,7 @@ export function ProductDetailPage({ productId, onNavigateBack }: ProductDetailPa
               ) : (
                 <div className="flex gap-2 md:gap-3">
                   <button
-                    onClick={isInCart ? () => { window.location.hash = 'cart' } : handleAddToCart}
+                    onClick={isInCart ? () => onNavigateToCart?.() : handleAddToCart}
                     disabled={!isInCart && !selectedSize}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 md:py-4 rounded-full text-xs md:text-sm tracking-wider transition-colors font-semibold ${
                       isInCart
