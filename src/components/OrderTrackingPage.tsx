@@ -7,6 +7,7 @@ interface OrderTrackingPageProps {
 }
 
 export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
+  const apiOrigin = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
   const [orderId, setOrderId] = useState('');
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,7 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
 
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/${orderId}`,
+        `${apiOrigin}/api/orders/${orderId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`

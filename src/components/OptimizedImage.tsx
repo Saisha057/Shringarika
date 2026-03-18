@@ -38,6 +38,7 @@ interface OptimizedImageProps {
   src: string;
   alt: string;
   className?: string;
+  imageClassName?: string;
   width?: number;
   height?: number;
   quality?: 'auto' | 'low' | 'medium' | 'high' | number;
@@ -50,6 +51,7 @@ interface OptimizedImageProps {
   onLoad?: () => void;
   onError?: () => void;
   priority?: boolean;
+  objectFit?: 'cover' | 'contain';
 }
 
 /**
@@ -78,6 +80,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
   className,
+  imageClassName,
   width,
   height,
   quality = 'auto',
@@ -90,6 +93,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onLoad,
   onError,
   priority = false,
+  objectFit = 'cover',
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -233,7 +237,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         className={cn(
           'transition-opacity duration-300',
           isLoaded ? 'opacity-100' : 'opacity-0',
-          'object-cover w-full h-full'
+          objectFit === 'contain' ? 'object-contain' : 'object-cover',
+          'w-full h-full',
+          imageClassName
         )}
         style={{
           aspectRatio: width && height ? `${width}/${height}` : undefined,

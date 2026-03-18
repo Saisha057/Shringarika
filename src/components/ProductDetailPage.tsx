@@ -7,7 +7,7 @@ import { useAdmin } from "../context/AdminContext"
 import { useAuth } from "../context/AuthContext"
 import { RestockNotificationModal } from "./RestockNotificationModal"
 import { ProductReviews } from "./ProductReviews"
-import { resolveImageUrl } from "./OptimizedImage"
+import { OptimizedImage } from "./OptimizedImage"
 import { useRecentlyViewed } from "../hooks/useRecentlyViewed"
 import { SizeRecommendation } from "./SizeRecommendation"
 import { ShippingCalculator } from './ShippingCalculator';
@@ -335,11 +335,17 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
             {/* FIX: Main Image - Display actual product image with proper fitting */}
             <div className="w-full aspect-3/4 sm:aspect-3/4 md:aspect-4/5 bg-neutral-100 border border-neutral-300 rounded-sm overflow-hidden">
               {primaryImage ? (
-                <img 
-                  src={resolveImageUrl(primaryImage)} 
+                <OptimizedImage
+                  src={primaryImage}
                   alt={product.name}
-                  className="w-full h-full object-contain object-center bg-white block p-2"
-                  loading="eager"
+                  className="w-full h-full"
+                  imageClassName="bg-white block p-2"
+                  lazy={false}
+                  priority={true}
+                  responsive={false}
+                  objectFit="contain"
+                  placeholder="color"
+                  placeholderColor="#ffffff"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -359,11 +365,17 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
                       currentImageIndex === index ? "border-black" : "border-neutral-300"
                     }`}
                   >
-                    <img 
-                      src={resolveImageUrl(image)} 
+                    <OptimizedImage
+                      src={image}
                       alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-contain object-center bg-white block p-1"
-                      loading={index === 0 ? "eager" : "lazy"}
+                      className="w-full h-full"
+                      imageClassName="bg-white block p-1"
+                      lazy={index !== 0}
+                      priority={index === 0}
+                      responsive={false}
+                      objectFit="contain"
+                      placeholder="color"
+                      placeholderColor="#ffffff"
                     />
                   </button>
                 ))}
