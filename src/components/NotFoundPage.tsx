@@ -82,18 +82,18 @@ export function NotFoundPage({
         <div className="mt-12 pt-8 border-t border-neutral-200">
           <p className="text-sm text-neutral-600 mb-4">POPULAR CATEGORIES</p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a href="#" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
+            <button type="button" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
               SAREES
-            </a>
-            <a href="#" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
+            </button>
+            <button type="button" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
               KURTIS
-            </a>
-            <a href="#" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
+            </button>
+            <button type="button" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
               LEHENGAS
-            </a>
-            <a href="#" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
+            </button>
+            <button type="button" className="px-4 py-2 bg-neutral-100 rounded hover:bg-neutral-200 transition-colors text-sm">
               DUPATTAS
-            </a>
+            </button>
           </div>
         </div>
       </div>

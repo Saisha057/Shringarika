@@ -182,20 +182,13 @@ function AppContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentPage]);
 
-  // INITIAL URL SYNC: support both legacy hash URLs and clean paths.
+  // INITIAL URL SYNC: use clean paths only.
   useEffect(() => {
     const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
-    const hash = window.location.hash.replace('#', '');
-    const initialRoute = path || hash;
+    const initialRoute = path;
 
     if (initialRoute && VALID_PAGES.has(initialRoute)) {
       setCurrentPage(initialRoute as typeof currentPage);
-
-      // Normalize legacy hash URLs to clean paths.
-      if (hash && !path) {
-        const cleanPath = initialRoute === 'home' ? '/' : `/${initialRoute}`;
-        window.history.replaceState({ page: initialRoute }, '', cleanPath);
-      }
     } else {
       setCurrentPage('home');
       window.history.replaceState({ page: 'home' }, '', '/');

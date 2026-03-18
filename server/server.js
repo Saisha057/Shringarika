@@ -5,12 +5,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import http from 'http';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Load environment variables — explicit path so this works regardless of CWD
 // (server is always inside /server/, __dirname = /server/)
@@ -215,6 +209,16 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Lightweight health endpoint for uptime monitors (Render, external pingers)
+app.get('/api/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// API-only root endpoint (frontend is hosted separately on Vercel)
+app.get('/', (req, res) => {
+  res.status(200).send('API running');
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -265,31 +269,6 @@ app.use('/api/admin', adminReturnsRoutes);
 
 // reCAPTCHA site key endpoint
 app.get('/api/recaptcha/site-key', getRecaptchaSiteKey);
-
-// ===== SERVE FRONTEND IN PRODUCTION =====
-// In production, serve the React build from the build folder
-if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '..', 'build');
-  
-  // Serve static files from the React build
-  app.use(express.static(frontendBuildPath));
-  
-  // Handle React routing - send all non-API requests to index.html
-  app.get('*', (req, res) => {
-    // Skip API routes and health check
-    if (req.path.startsWith('/api') || req.path === '/health' || 
-        req.path === '/sitemap.xml' || req.path === '/robots.txt') {
-      return res.status(404).json({
-        status: 'error',
-        message: 'API route not found',
-      });
-    }
-    
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
-  });
-  
-  console.log('✅ Serving frontend from build folder');
-}
 
 // 404 handler for API routes in development
 if (process.env.NODE_ENV !== 'production') {
