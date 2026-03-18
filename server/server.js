@@ -130,24 +130,24 @@ app.use(setSecurityHeaders);
 
 // 3. CORS configuration - Allow multiple frontend origins
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
+  "http://localhost:5173",
+  "https://shringarika.vercel.app",
+  "https://shringarika.studio",
+  "https://www.shringarika.studio",
   process.env.FRONTEND_URL
-].filter(Boolean); // Remove undefined values
+].filter(Boolean);
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.warn(`⚠️ CORS blocked origin: ${origin}`);
-      callback(null, true); // Allow anyway for development
+  origin:function(origin, callback){
+    if(!origin) return callback(null,true);
+
+    if(allowedOrigins.includes(origin)){
+      callback(null,true);
+    }else{
+      callback(new Error("CORS not allowed"));
     }
   },
-  credentials: true,
+  credentials:true
 }));
 
 // 4. Rate limiting - Prevent API abuse
