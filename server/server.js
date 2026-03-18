@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -15,7 +14,7 @@ const __dirname = path.dirname(__filename);
 
 // Load environment variables — explicit path so this works regardless of CWD
 // (server is always inside /server/, __dirname = /server/)
-dotenv.config({ path: path.join(__dirname, '.env') });
+
 console.log('✅ Environment variables loaded');
 console.log('✅ PORT:', process.env.PORT || 5000);
 console.log('✅ NODE_ENV:', process.env.NODE_ENV);

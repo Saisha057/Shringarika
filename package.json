@@ -10,11 +10,16 @@
     "server": "cd server && npm run dev",
     "server:prod": "cd server && npm start",
     "client": "vite",
-    "start": "npm run build:prod && npm run server:prod",
+    "start": "cd server && npm start",
     "start:dev": "run-p server client",
     "install-all": "npm install && cd server && npm install",
     "production": "NODE_ENV=production npm run build:prod && NODE_ENV=production npm run server:prod"
   },
+
+  "engines": {
+  "node": "18.x"
+},
+
   "dependencies": {
     "@radix-ui/react-accordion": "1.2.3",
     "@radix-ui/react-alert-dialog": "1.1.6",
