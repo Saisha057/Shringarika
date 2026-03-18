@@ -2,6 +2,8 @@
   "name": "shringarika-frontend",
   "version": "0.1.0",
   "private": true,
+
+  
   "scripts": {
     "build": "vite build",
     "build:prod": "vite build && echo Build complete! Frontend assets ready in /build",
@@ -17,7 +19,7 @@
   },
 
   "engines": {
-  "node": "18.x"
+  "node": "24.x"
 },
 
   "dependencies": {
