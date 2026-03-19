@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Search, Package } from 'lucide-react';
-import axios from 'axios';
+import API from '../lib/api';
 
 interface OrderTrackingPageProps {
   onBack: () => void;
 }
 
 export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
-  const apiOrigin = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
   const [orderId, setOrderId] = useState('');
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +23,8 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
     setOrder(null);
 
     try {
-      const response = await axios.get(
-        `${apiOrigin}/api/orders/${orderId}`,
+      const response = await API.get(
+        `/orders/${orderId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`

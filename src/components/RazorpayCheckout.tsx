@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import API from '../lib/api';
 
 interface RazorpayCheckoutProps {
   amount: number;
@@ -19,8 +19,6 @@ declare global {
   }
 }
 
-const API_URL = import.meta.env.VITE_API_URL || ''; // Use Vite proxy (empty = relative URLs)
-
 export function RazorpayCheckout({
   amount,
   orderId,
@@ -38,8 +36,8 @@ export function RazorpayCheckout({
       setIsLoading(true);
 
       // Step 1: Create Razorpay order on backend
-      const { data: orderData } = await axios.post(
-        `${API_URL}/payments/create-order`,
+      const { data: orderData } = await API.post(
+        '/payments/create-order',
         {
           amount,
           currency: 'INR',
@@ -92,8 +90,8 @@ export function RazorpayCheckout({
             });
 
             // Step 3: Verify payment on backend
-            const verificationPromise = axios.post(
-              `${API_URL}/payments/verify-payment`,
+            const verificationPromise = API.post(
+              '/payments/verify-payment',
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

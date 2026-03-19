@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { authAPI } from '../services/api';
-import axios from 'axios';
+import API from '../lib/api';
 
 interface Review {
   id: number;
@@ -31,13 +31,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
   const loadReviews = async () => {
     try {
-      // Use the base API URL properly - don't duplicate /api
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const endpoint = baseURL.endsWith('/api') 
-        ? `${baseURL}/reviews/product/${productId}`
-        : `${baseURL}/api/reviews/product/${productId}`;
-      
-      const response = await axios.get(endpoint);
+      const response = await API.get(`/reviews/product/${productId}`);
       setReviews(response.data.reviews || []);
     } catch (error) {
       console.error('Failed to load reviews:', error);
@@ -57,14 +51,8 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
     setIsSubmitting(true);
     try {
-      // Use the base API URL properly - don't duplicate /api
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const endpoint = baseURL.endsWith('/api') 
-        ? `${baseURL}/reviews`
-        : `${baseURL}/api/reviews`;
-      
-      await axios.post(
-        endpoint,
+      await API.post(
+        '/reviews',
         { productId, rating, comment },
         {
           headers: {

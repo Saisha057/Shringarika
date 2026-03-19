@@ -123,11 +123,15 @@ export const checkUserRateLimit = (userId, maxRequests = 100, windowMs = 15 * 60
 // CSRF protection - verify origin
 export const verifyOrigin = (req, res, next) => {
   const origin = req.get('origin') || req.get('referer');
-  const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    'http://localhost:3000',
-    'http://localhost:5173',
-  ];
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowedOrigins = isProduction
+    ? ['https://shringarika.studio']
+    : [
+        process.env.FRONTEND_URL,
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://shringarika.studio',
+      ].filter(Boolean);
   
   // Skip origin check for safe methods
   if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {

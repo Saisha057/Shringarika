@@ -1,6 +1,6 @@
 import { ChevronLeft, User, Package, CreditCard, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
 interface AccountPageProps {
@@ -30,7 +30,7 @@ export function AccountPage({
 
       try {
         // Try to fetch from backend first
-        const response = await axios.get(`/api/orders/user/${user.id}`, {
+        const response = await API.get(`/orders/user/${user.id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
         });
 

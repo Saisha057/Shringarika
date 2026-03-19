@@ -122,14 +122,16 @@ app.use(helmet({
 }));
 app.use(setSecurityHeaders);
 
-// 3. CORS configuration - Allow multiple frontend origins
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://shringarika.vercel.app",
-  "https://shringarika.studio",
-  "https://www.shringarika.studio",
-  process.env.FRONTEND_URL
-].filter(Boolean);
+// 3. CORS configuration
+const isProduction = process.env.NODE_ENV === 'production';
+const allowedOrigins = isProduction
+  ? ["https://shringarika.studio"]
+  : [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://shringarika.studio",
+      process.env.FRONTEND_URL,
+    ].filter(Boolean);
 
 app.use(cors({
   origin:function(origin, callback){

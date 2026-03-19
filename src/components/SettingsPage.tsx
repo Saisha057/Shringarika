@@ -1,6 +1,6 @@
 import { ChevronLeft, Bell, Lock, CreditCard, Trash2, Eye, EyeOff, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
 interface SettingsPageProps {
@@ -65,7 +65,7 @@ export function SettingsPage({ onNavigateHome }: SettingsPageProps) {
   const loadSettings = async () => {
     try {
       // Try to load from backend first
-      const response = await axios.get('/api/users/settings', {
+      const response = await API.get('/users/settings', {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
       });
       if (response.data.data?.settings) {
@@ -91,7 +91,7 @@ export function SettingsPage({ onNavigateHome }: SettingsPageProps) {
 
   const loadPaymentMethods = async () => {
     try {
-      const response = await axios.get('/api/users/payment-methods', {
+      const response = await API.get('/users/payment-methods', {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
       });
       if (response.data.data?.paymentMethods) {
@@ -115,7 +115,7 @@ export function SettingsPage({ onNavigateHome }: SettingsPageProps) {
     
     try {
       // Try to save to backend
-      await axios.put('/api/users/settings', newSettings, {
+      await API.put('/users/settings', newSettings, {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
       });
       console.log('✅ Settings saved to backend');
@@ -172,8 +172,8 @@ export function SettingsPage({ onNavigateHome }: SettingsPageProps) {
 
     setSaving(true);
     try {
-      const response = await axios.put(
-        '/api/users/change-password',
+      const response = await API.put(
+        '/users/change-password',
         {
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
@@ -218,7 +218,7 @@ export function SettingsPage({ onNavigateHome }: SettingsPageProps) {
 
     setSaving(true);
     try {
-      await axios.delete('/api/users/account', {
+      await API.delete('/users/account', {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
         data: { password: deletePassword }
       });
@@ -238,7 +238,7 @@ export function SettingsPage({ onNavigateHome }: SettingsPageProps) {
     if (!window.confirm('Delete this payment method?')) return;
 
     try {
-      await axios.delete(`/api/users/payment-methods/${id}`, {
+      await API.delete(`/users/payment-methods/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
       });
       await loadPaymentMethods();

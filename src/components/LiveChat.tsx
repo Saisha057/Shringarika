@@ -16,6 +16,7 @@ interface Message {
 
 export function LiveChat() {
   const { user } = useAuth()
+  const socketOrigin = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '').replace(/\/api$/i, '')
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -30,7 +31,7 @@ export function LiveChat() {
   useEffect(() => {
     if (isOpen && !socketRef.current) {
       // Connect to Socket.io server
-      const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+      const socket = io(socketOrigin, {
         query: {
           userId: user?.id || 'guest',
           userName: user?.name || 'Guest',
@@ -81,7 +82,7 @@ export function LiveChat() {
         socketRef.current = null
       }
     }
-  }, [isOpen, user?.id, user?.name])
+  }, [isOpen, user?.id, user?.name, socketOrigin])
 
   useEffect(() => {
     scrollToBottom()

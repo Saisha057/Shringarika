@@ -1,6 +1,6 @@
 import { ChevronLeft, Mail, Phone, Send, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
-import axios from 'axios';
+import API from '../lib/api';
 import { 
   validateEmail,
   validatePhone,
@@ -89,7 +89,7 @@ export function ContactUsPage({ onNavigateHome, onNavigateFAQ }: ContactUsPagePr
     };
     
     try {
-      const response = await axios.post('/api/contact', sanitizedData);
+      const response = await API.post('/contact', sanitizedData);
       
       if (response.data.success) {
         console.log('✅ Contact form submitted successfully');
