@@ -152,6 +152,9 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 console.log('✅ Rate limiting enabled');
 
+// Razorpay webhook signature verification requires raw request body.
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

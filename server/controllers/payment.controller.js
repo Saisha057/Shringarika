@@ -10,6 +10,10 @@ export const createOrder = async (req, res, next) => {
   try {
     const { amount, currency = 'INR', receipt, notes } = req.body;
 
+    if (!process.env.RAZORPAY_KEY_ID) {
+      throw new Error('Razorpay key missing');
+    }
+
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, error: 'Valid amount is required' });
     }
@@ -87,7 +91,7 @@ export const verifyPayment = async (req, res, next) => {
 
     if (!isValid) {
       console.error('❌ [PAYMENT] Invalid signature!');
-      return res.status(400).json({ success: false, error: 'Payment verification failed: invalid signature' });
+      return res.status(400).json({ success: false, error: 'Invalid payment signature' });
     }
 
     console.log('✅ [PAYMENT] Signature verified successfully');
@@ -152,19 +156,35 @@ export const verifyPayment = async (req, res, next) => {
 export const paymentWebhook = async (req, res, next) => {
   try {
     const webhookSignature = req.headers['x-razorpay-signature'];
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      return res.status(500).json({ status: 'error', message: 'Webhook secret not configured' });
+    }
+
+    if (!webhookSignature) {
+      return res.status(400).json({ status: 'error', message: 'Missing webhook signature' });
+    }
+
+    // In production this route uses express.raw, so req.body is a Buffer.
+    const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body || {}));
     
     // Verify webhook signature
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
-      .update(JSON.stringify(req.body))
+      .createHmac('sha256', webhookSecret)
+      .update(rawBody)
       .digest('hex');
 
     if (webhookSignature !== expectedSignature) {
       return res.status(400).json({ status: 'error', message: 'Invalid webhook signature' });
     }
 
-    const event = req.body.event;
-    const payment = req.body.payload?.payment?.entity;
+    const payload = Buffer.isBuffer(req.body)
+      ? JSON.parse(req.body.toString('utf8'))
+      : req.body;
+
+    const event = payload.event;
+    const payment = payload.payload?.payment?.entity;
 
     switch (event) {
       case 'payment.captured':
