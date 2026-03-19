@@ -123,11 +123,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [stock, setStock] = useState<Record<number, StockInfo>>({})
   const [restockNotifications, setRestockNotifications] = useState<RestockNotification[]>([])
-  // PERSISTENCE FIX: Load admin mode from localStorage on mount
-  const [isAdminMode, setIsAdminMode] = useState(() => {
-    const savedAdminMode = localStorage.getItem('isAdminMode')
-    return savedAdminMode === 'true'
-  })
+  // Keep admin mode session-local; do not auto-restore on app launch.
+  const [isAdminMode, setIsAdminMode] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
   /**
@@ -493,8 +490,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const setAdminMode = (isAdmin: boolean) => {
     console.log('🔧 Setting admin mode:', isAdmin)
     setIsAdminMode(isAdmin)
-    // PERSISTENCE FIX: Save admin mode to localStorage
-    localStorage.setItem('isAdminMode', String(isAdmin))
+    // Remove stale persisted values from older builds.
+    localStorage.removeItem('isAdminMode')
   }
 
   const markAsNewArrival = (productId: number, isNew: boolean) => {

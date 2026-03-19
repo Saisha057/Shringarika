@@ -102,7 +102,7 @@ function AppContent() {
     console.log('🔒 Security measures initialized');
   }, []);
   
-  // PERSISTENCE FIX: Restore current page from localStorage on refresh
+  // Initialize page from URL path so root always opens home.
   const [currentPage, setCurrentPage] = useState<
     | "home"
     | "products"
@@ -130,9 +130,36 @@ function AppContent() {
     | "terms-of-service"
     | "cookie-policy"
   >(() => {
-    // Restore page from localStorage, default to "home"
-    const savedPage = localStorage.getItem('currentPage') as typeof currentPage | null;
-    return savedPage || "home";
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    if (path && VALID_PAGES.has(path)) {
+      return path as
+        | "home"
+        | "products"
+        | "product-detail"
+        | "cart"
+        | "checkout"
+        | "order-confirmation"
+        | "search"
+        | "about"
+        | "contact"
+        | "account"
+        | "my-account-dashboard"
+        | "orders"
+        | "profile"
+        | "address-book"
+        | "wallet"
+        | "wishlist"
+        | "settings"
+        | "shipping"
+        | "faq"
+        | "sustainability"
+        | "reset-password"
+        | "track-order"
+        | "privacy-policy"
+        | "terms-of-service"
+        | "cookie-policy";
+    }
+    return "home";
   })
 
   // PERSISTENCE FIX: Restore selected product and order ID from localStorage
