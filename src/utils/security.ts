@@ -169,7 +169,7 @@ export const setCSPMeta = () => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.example.com",
+    "connect-src 'self' https://shringarika.onrender.com wss://shringarika.onrender.com https://srdljxbumxkgjxoqqrzs.supabase.co https://checkout.razorpay.com https://api.razorpay.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'"
