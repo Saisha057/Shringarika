@@ -198,16 +198,20 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
 
   // Check if product is in wishlist on mount
   useEffect(() => {
-    if (!user?.id || !product?.id) {
+    if (!product?.id) {
       setIsInWishlist(false);
       return;
     }
 
-    const wishlistKey = getWishlistKey();
-    const wishlist = JSON.parse(localStorage.getItem(wishlistKey) || '[]')
-    const isInList = wishlist.some((item: any) => item.id === product.id)
-    setIsInWishlist(isInList)
-    console.log('💚 Wishlist check for user', user.id, '- Product', product.id, 'in wishlist:', isInList);
+    if (user?.id) {
+      const wishlistKey = getWishlistKey();
+      const wishlist = JSON.parse(localStorage.getItem(wishlistKey) || '[]')
+      const isInList = wishlist.some((item: any) => item.id === product.id)
+      setIsInWishlist(isInList)
+      console.log('💚 Wishlist check for user', user.id, '- Product', product.id, 'in wishlist:', isInList);
+    } else {
+      setIsInWishlist(false);
+    }
     
     // Add to recently viewed
     addToRecentlyViewed(product, user?.id);
