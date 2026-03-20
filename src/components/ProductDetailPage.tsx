@@ -95,7 +95,8 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
       const productIdStr = String(product.id);
       console.log('🔍 Fetching variants for product:', productIdStr);
       
-      const response = await fetch(`/api/products/${productIdStr}/variants-dynamic`, {
+      const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '').replace(/\/api$/i, '');
+      const response = await fetch(`${API_BASE}/api/products/${productIdStr}/variants-dynamic`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -339,11 +340,11 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
                   src={primaryImage}
                   alt={product.name}
                   className="w-full h-full"
-                  imageClassName="bg-white block p-2"
+                  imageClassName="bg-white block"
                   lazy={false}
                   priority={true}
                   responsive={false}
-                  objectFit="contain"
+                  objectFit="cover"
                   placeholder="color"
                   placeholderColor="#ffffff"
                 />

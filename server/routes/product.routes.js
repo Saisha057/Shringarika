@@ -93,6 +93,22 @@ router.put('/:id/variants/stock', protect, authorize('admin'), async (req, res) 
 
     const results = await Promise.all(updatePromises);
 
+    // Recalculate and sync total_stock on products table
+    const { data: allVariants, error: sumError } = await supabase
+      .from('product_inventory')
+      .select('stock')
+      .eq('product_id', id)
+      .eq('is_active', true);
+
+    if (!sumError && allVariants) {
+      const newTotalStock = allVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
+      await supabase
+        .from('products')
+        .update({ total_stock: newTotalStock })
+        .eq('id', id);
+      console.log(`✅ total_stock synced for product ${id}: ${newTotalStock}`);
+    }
+
     res.json({
       status: 'success',
       message: 'Variant stock updated successfully',
