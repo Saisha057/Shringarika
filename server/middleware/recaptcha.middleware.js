@@ -25,8 +25,15 @@ export const verifyRecaptcha = recaptcha?.middleware?.verify;
  */
 export const checkRecaptcha = async (req, res, next) => {
   try {
+    const recaptchaSecret = (process.env.RECAPTCHA_SECRET_KEY || '').trim();
+
+    if (!recaptchaSecret) {
+      console.warn('[reCAPTCHA] Skipping verification - secret key not configured');
+      return next();
+    }
+
     // Skip in test/development if not configured
-    if (!process.env.RECAPTCHA_SECRET_KEY || process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test') {
       console.warn('[reCAPTCHA] Skipping verification - not configured or in test mode');
       return next();
     }
@@ -49,7 +56,7 @@ export const checkRecaptcha = async (req, res, next) => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}&remoteip=${req.ip}`
+      body: `secret=${recaptchaSecret}&response=${token}&remoteip=${req.ip}`
     });
     
     const data = await response.json();

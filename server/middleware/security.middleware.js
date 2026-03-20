@@ -125,13 +125,19 @@ export const verifyOrigin = (req, res, next) => {
   const origin = req.get('origin') || req.get('referer');
   const isProduction = process.env.NODE_ENV === 'production';
   const allowedOrigins = isProduction
-    ? ['https://shringarika.studio']
+    ? ['https://shringarika.studio', 'https://www.shringarika.studio']
     : [
         process.env.FRONTEND_URL,
         'http://localhost:3000',
         'http://localhost:5173',
         'https://shringarika.studio',
+        'https://www.shringarika.studio',
       ].filter(Boolean);
+
+  // Allow non-browser and internal calls that do not send Origin/Referer.
+  if (!origin) {
+    return next();
+  }
   
   // Skip origin check for safe methods
   if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
@@ -152,7 +158,7 @@ export const verifyOrigin = (req, res, next) => {
   }
   
   // For other state-changing requests, verify origin
-  if (!origin || !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+  if (!allowedOrigins.some(allowed => origin.startsWith(allowed))) {
     console.error('❌ [SECURITY] Origin verification failed:', { 
       origin, 
       allowedOrigins, 
