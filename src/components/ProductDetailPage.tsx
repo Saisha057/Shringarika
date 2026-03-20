@@ -153,7 +153,23 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
       }
     } catch (err) {
       console.error('❌ Error fetching dynamic variants:', err);
-      // Fallback to product static arrays if API fails
+      try {
+        const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '').replace(/\/api$/i, '');
+        const [colorsRes, sizesRes] = await Promise.all([
+          fetch(`${API_BASE}/api/products/${String(product?.id)}/colors`),
+          fetch(`${API_BASE}/api/products/${String(product?.id)}/sizes`)
+        ]);
+        if (colorsRes.ok && sizesRes.ok) {
+          const colorsData = await colorsRes.json();
+          const sizesData = await sizesRes.json();
+          setAvailableColors(colorsData.data?.colors || []);
+          setAvailableSizes(sizesData.data?.sizes || []);
+          setVariantsLoading(false);
+          return;
+        }
+      } catch (fallbackErr) {
+        console.error('❌ Fallback colors/sizes fetch also failed:', fallbackErr);
+      }
       const toTitleCaseFallback = (s: string) => s.trim().replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase());
       const rawFallback = (product?.colors || []).map(toTitleCaseFallback);
       const normalizedPrimaryFallback = product?.color ? toTitleCaseFallback(product.color) : '';
@@ -163,7 +179,6 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
       }
       setAvailableColors(fallbackColors);
       setAvailableSizes(product?.sizes || []);
-      
       if (!selectedColor) {
         const fallbackColor = normalizedPrimaryFallback || fallbackColors[0] || '';
         setSelectedColor(fallbackColor);
