@@ -657,7 +657,7 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
                   </button>
                   <button 
                     onClick={handleWishlist}
-                    className={`border p-2.5 md:p-4 rounded-full transition-colors ${
+                    className={`w-10 h-10 md:w-12 md:h-12 border rounded-full flex items-center justify-center transition-colors ${
                       isInWishlist 
                         ? "bg-black text-white border-black" 
                         : "border-black hover:bg-black hover:text-white"
@@ -668,7 +668,7 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
                   </button>
                   <button 
                     onClick={handleShare}
-                    className="border border-black p-2.5 md:p-4 rounded-full hover:bg-black hover:text-white transition-colors"
+                    className="w-10 h-10 md:w-12 md:h-12 border border-black rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-colors"
                     title="Share product"
                   >
                     <Share2 className="w-5 h-5" />

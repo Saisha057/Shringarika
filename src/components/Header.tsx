@@ -68,9 +68,9 @@ export function Header({
       />
 
       <header className="bg-neutral-100 border-b border-neutral-300 px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto grid grid-cols-3 items-center">
           {/* Left - Menu */}
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-3 md:gap-6 justify-self-start">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -90,7 +90,7 @@ export function Header({
           </div>
 
           {/* Center - Logo */}
-          <div className="flex-1 min-w-0 px-2 md:px-0 text-center md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
+          <div className="flex justify-center min-w-0 px-2 md:px-0">
             <button onClick={onNavigateHome}>
               <h1 className="mobile-brand-text text-base sm:text-xl md:text-2xl lg:text-3xl tracking-wider md:tracking-widest hover:opacity-70 transition-opacity max-w-[120px] sm:max-w-[200px] md:max-w-none overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontFamily: 'TiroDevanagariMarathi, serif' }}>
                 श्रृ<span style={{ color: 'red' }}>ं</span>गारिका
@@ -99,7 +99,7 @@ export function Header({
           </div>
 
           {/* Right - Search, User, Cart */}
-          <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
+          <div className="flex items-center justify-end gap-1 sm:gap-2 md:gap-3 shrink-0 justify-self-end">
             <button
               onClick={onNavigateToSearch}
               className="p-1.5 md:p-2 hover:bg-neutral-200 rounded-full transition-colors"
@@ -164,10 +164,10 @@ export function Header({
               </button>
             )}
 
-            <button onClick={onNavigateToCart} className="p-1.5 md:p-2 relative">
+            <button onClick={onNavigateToCart} className="relative p-1.5 md:p-2">
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-semibold">
+                <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-black text-white text-xs font-medium leading-none">
                   {cartCount}
                 </span>
               )}
