@@ -167,7 +167,7 @@ export function Header({
             <button onClick={onNavigateToCart} className="relative p-1.5 md:p-2">
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-black text-white text-xs font-medium leading-none">
+                <span className="absolute -top-1 -right-1.5 h-[18px] min-w-[18px] px-1 flex items-center justify-center rounded-full bg-black text-white text-[11px] font-medium leading-none">
                   {cartCount}
                 </span>
               )}

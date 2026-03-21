@@ -45,6 +45,22 @@ export function MenuDrawer({
     };
   }, [isOpen]);
 
+  // Connect mobile drawer state to browser back button.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.history.pushState({ menuDrawerOpen: true }, '', window.location.href);
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isOpen, onClose]);
+
   const handleProtectedNavigation = (navigationFn: () => void) => {
     if (!isAuthenticated) {
       onClose();
@@ -212,7 +228,7 @@ export function MenuDrawer({
           {/* Footer */}
           <div className="px-4 sm:px-6 py-4 sm:py-6 border-t border-neutral-200">
             <p className="text-xs text-neutral-500 text-center">
-              © 2025 Shringarika. All rights reserved.
+              © {new Date().getFullYear()} Shringarika. All rights reserved.
             </p>
           </div>
         </div>
