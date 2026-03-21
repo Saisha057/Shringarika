@@ -2,6 +2,14 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { Product } from '../data/products';
 import { cartAPI } from '../services/api';
 import { useAuth } from './AuthContext';
+import {
+  addToGuestCart,
+  clearGuestCart,
+  getGuestCart,
+  GuestCartItem,
+  removeFromGuestCart,
+  updateGuestCartQuantity,
+} from '../utils/cartStorage';
 
 export interface CartItem {
   product: Product;
@@ -26,63 +34,70 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const { user } = useAuth();
-  const [hasSyncedCart, setHasSyncedCart] = useState(false);
 
-  // P1-002 FIX: Persist cart to localStorage whenever it changes
-  useEffect(() => {
-    if (cart.length > 0) {
-      localStorage.setItem('fashionCart', JSON.stringify(cart));
-      console.log('💾 Cart saved to localStorage:', cart.length, 'items');
-    }
-  }, [cart]);
+  const toGuestCartItem = (item: CartItem): GuestCartItem => ({
+    productId: String(item.product.id),
+    variantId: item.variantId ?? null,
+    quantity: item.quantity,
+    price: Number(item.product.price || 0),
+    name: item.product.name || 'Product',
+    image: item.product.images?.[0] || '',
+    color: item.color || item.product.color || '',
+    size: item.size,
+  });
+
+  const guestToCartItem = (item: GuestCartItem): CartItem => ({
+    product: {
+      id: item.productId,
+      name: item.name,
+      price: item.price,
+      color: item.color,
+      category: 'general',
+      images: item.image ? [item.image] : [],
+      sizes: item.size ? [item.size] : [],
+    },
+    size: item.size,
+    color: item.color,
+    quantity: item.quantity,
+    variantId: item.variantId,
+  });
+
+  const normalizeServerItem = (item: any): CartItem => {
+    if (item?.product) return item as CartItem;
+
+    return {
+      product: {
+        id: item.productId,
+        name: item.name || 'Product',
+        price: Number(item.price || 0),
+        color: item.color || '',
+        category: 'general',
+        images: item.image ? [item.image] : [],
+        sizes: item.size ? [item.size] : [],
+      },
+      size: item.size || '',
+      color: item.color,
+      quantity: Number(item.quantity || 1),
+      variantId: item.variantId || null,
+    };
+  };
 
   // Load cart on mount - from backend if logged in, from localStorage if not
   useEffect(() => {
     const loadCart = async () => {
       if (user) {
-        // User just logged in - preserve and merge guest cart
-        const guestCart = localStorage.getItem('fashionCart');
-        
-        // First, fetch backend cart
         try {
-          console.log("🛒 Loading cart from backend for user:", user.email);
-          const response = await cartAPI.get();
-          const backendCart = response?.data?.items || [];
-          console.log("✅ Loaded", backendCart.length, "items from backend cart");
-          
-          // Merge guest cart with backend cart if guest had items
-          if (guestCart && !hasSyncedCart) {
-            try {
-              const guestItems: CartItem[] = JSON.parse(guestCart);
-              console.log("🔄 Found", guestItems.length, "items in guest cart - merging...");
-              
-              // Merge logic: Add guest items that aren't already in backend cart
-              const mergedCart = [...backendCart];
-              guestItems.forEach(guestItem => {
-                const existsInBackend = backendCart.find(
-                  (item: any) => item.product.id === guestItem.product.id && item.size === guestItem.size
-                );
-                if (!existsInBackend) {
-                  mergedCart.push(guestItem);
-                }
-              });
-              
-              if (mergedCart.length > backendCart.length) {
-                console.log("✅ Merged guest cart: Total", mergedCart.length, "items");
-                setCart(mergedCart);
-                // Sync merged cart to backend
-                await cartAPI.syncLocalCart(mergedCart);
-                setHasSyncedCart(true);
-              } else {
-                setCart(backendCart);
-              }
-            } catch (err) {
-              console.error('Error merging carts:', err);
-              setCart(backendCart);
-            }
-          } else {
-            setCart(backendCart);
+          const guestItems = getGuestCart();
+
+          // On login, merge guest cart into user cart in backend and then clear guest storage.
+          if (guestItems.length > 0) {
+            await cartAPI.mergeGuestCart(guestItems);
+            clearGuestCart();
           }
+
+          const response = await cartAPI.get();
+          const backendItems = response?.items || response?.data?.items || [];
+          setCart((backendItems || []).map(normalizeServerItem));
         } catch (error: any) {
           // Silently fallback to localStorage for 401/500 errors
           if (error.response?.status === 401 || error.response?.status === 500) {
@@ -90,47 +105,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
           } else {
             console.error("❌ Error loading cart from backend:", error);
           }
-          // Fallback to localStorage
-          const savedCart = localStorage.getItem('fashionCart');
-          if (savedCart) {
-            try {
-              const localCart = JSON.parse(savedCart);
-              setCart(localCart);
-            } catch (err) {
-              console.error('Error loading local cart:', err);
-              setCart([]);
-            }
-          } else {
-            setCart([]);
-          }
+          setCart(getGuestCart().map(guestToCartItem));
         }
       } else {
-        // Not logged in - use localStorage
-        setHasSyncedCart(false); // Reset sync flag when logged out
-        const savedCart = localStorage.getItem('fashionCart');
-        if (savedCart) {
-          try {
-            console.log("📦 Loading cart from localStorage (not logged in)");
-            setCart(JSON.parse(savedCart));
-          } catch (error) {
-            console.error('Error loading cart:', error);
-            setCart([]);
-          }
-        } else {
-          setCart([]);
-        }
+        // Guest cart stays fully local and browser-specific.
+        setCart(getGuestCart().map(guestToCartItem));
       }
     };
 
     loadCart();
   }, [user]);
 
-  // Save cart to localStorage for guest users
+  // Keep guest cart synchronized across multiple browser tabs.
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem('fashionCart', JSON.stringify(cart));
-    }
-  }, [cart, user]);
+    if (user) return;
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'guest_cart') {
+        setCart(getGuestCart().map(guestToCartItem));
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [user]);
 
   const addToCart = async (product: Product, size: string, color?: string) => {
     // Fetch variant ID from product_inventory table (renamed to product_variants in backend)
@@ -161,6 +159,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
 
+    if (!user) {
+      const nextGuest = addToGuestCart(
+        toGuestCartItem({
+          product,
+          size,
+          color,
+          quantity: 1,
+          variantId,
+        }),
+      );
+      setCart(nextGuest.map(guestToCartItem));
+      return;
+    }
+
     // Update backend if user is logged in (fail silently if backend unavailable)
     if (user) {
       try {
@@ -182,7 +194,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Update local state
+    // Update local state for logged-in users
     setCart((prevCart) => {
       if (existingItem) {
         return prevCart.map((item) =>
@@ -196,6 +208,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = async (productId: number, size: string) => {
+    if (!user) {
+      const currentItem = cart.find((item) => item.product.id === productId && item.size === size);
+      const nextGuest = removeFromGuestCart(
+        String(productId),
+        size,
+        currentItem?.color,
+        currentItem?.variantId,
+      );
+      setCart(nextGuest.map(guestToCartItem));
+      return;
+    }
+
     // Update backend if user is logged in (fail silently if backend unavailable)
     if (user) {
       try {
@@ -229,6 +253,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (!user) {
+      const currentItem = cart.find((item) => item.product.id === productId && item.size === size);
+      const nextGuest = updateGuestCartQuantity(
+        String(productId),
+        size,
+        quantity,
+        currentItem?.color,
+        currentItem?.variantId,
+      );
+      setCart(nextGuest.map(guestToCartItem));
+      return;
+    }
+
     // Update backend if user is logged in (fail silently if backend unavailable)
     if (user) {
       try {
@@ -257,6 +294,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const clearCart = async () => {
+    if (!user) {
+      clearGuestCart();
+      setCart([]);
+      return;
+    }
+
     // Clear backend cart if user is logged in (fail silently if backend unavailable)
     if (user) {
       try {
@@ -272,9 +315,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Clear local state and localStorage
+    // Clear local state
     setCart([]);
-    localStorage.removeItem('fashionCart');
   };
 
   const getCartCount = () => {

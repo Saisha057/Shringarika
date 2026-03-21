@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       // CRITICAL: Save guest cart AND guest wishlist BEFORE clearing localStorage
-      const guestCart = localStorage.getItem('fashionCart');
+      const guestCart = localStorage.getItem('guest_cart');
       console.log('💾 Preserving guest cart before login:', guestCart ? JSON.parse(guestCart).length + ' items' : '0 items');
       // Save guest wishlist BEFORE the cleanup loop deletes fashionWishlist_guest
       const guestWishlistRaw = localStorage.getItem('fashionWishlist_guest');
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Restore guest cart after login
         if (guestCart) {
-          localStorage.setItem('fashionCart', guestCart);
+          localStorage.setItem('guest_cart', guestCart);
           console.log('✅ Restored guest cart after login');
         }
 
@@ -217,10 +217,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     
-    // CRITICAL: Clear cart on logout to prevent data leakage
-    localStorage.removeItem('fashionCart'); // ✅ Primary cart key
-    localStorage.removeItem('cart'); // ✅ Legacy cart key
-    console.log('🛒 Cart cleared on logout');
+    // Keep guest_cart intact on logout so guest mode can resume its own local cart.
+    localStorage.removeItem('fashionCart'); // legacy cleanup
+    localStorage.removeItem('cart'); // legacy cleanup
     
     // SECURITY FIX: Clear ALL user-specific data on logout
     localStorage.removeItem('authToken');

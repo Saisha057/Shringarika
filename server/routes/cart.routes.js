@@ -6,6 +6,48 @@ const router = express.Router();
 // In-memory cart storage (replace with database later)
 const carts = new Map();
 
+const mergeItemsByIdentity = (baseItems = [], incomingItems = []) => {
+  const next = [...baseItems];
+
+  for (const incoming of incomingItems) {
+    const incomingProductId = String(incoming.productId);
+    const incomingSize = incoming.size || '';
+    const incomingColor = incoming.color || '';
+    const incomingVariantId = incoming.variantId || null;
+    const incomingQty = Number(incoming.quantity || 0);
+
+    if (!incomingProductId || incomingQty <= 0) continue;
+
+    const idx = next.findIndex((item) => {
+      return (
+        String(item.productId) === incomingProductId &&
+        (item.size || '') === incomingSize &&
+        (item.color || '') === incomingColor &&
+        (item.variantId || null) === incomingVariantId
+      );
+    });
+
+    if (idx > -1) {
+      next[idx].quantity = Number(next[idx].quantity || 0) + incomingQty;
+      continue;
+    }
+
+    next.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 7),
+      productId: incomingProductId,
+      variantId: incomingVariantId,
+      name: incoming.name,
+      price: Number(incoming.price || 0),
+      image: incoming.image,
+      quantity: incomingQty,
+      size: incomingSize,
+      color: incomingColor,
+    });
+  }
+
+  return next;
+};
+
 // Get user's cart
 router.get('/', protect, async (req, res) => {
   try {
@@ -137,6 +179,27 @@ router.post('/sync', protect, async (req, res) => {
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: 'Error syncing cart', error: error.message });
+  }
+});
+
+// Merge guest cart into authenticated user's cart
+router.post('/merge', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { items } = req.body;
+
+    const currentCart = carts.get(userId) || { items: [], total: 0 };
+    const mergedItems = mergeItemsByIdentity(currentCart.items, Array.isArray(items) ? items : []);
+
+    const mergedCart = {
+      items: mergedItems,
+      total: mergedItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0),
+    };
+
+    carts.set(userId, mergedCart);
+    res.json(mergedCart);
+  } catch (error) {
+    res.status(500).json({ message: 'Error merging guest cart', error: error.message });
   }
 });
 
