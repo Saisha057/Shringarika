@@ -2,8 +2,6 @@
   "name": "shringarika-frontend",
   "version": "0.1.0",
   "private": true,
-
-  
   "scripts": {
     "build": "vite build",
     "build:prod": "vite build && echo Build complete! Frontend assets ready in /build",
@@ -17,11 +15,9 @@
     "install-all": "npm install && cd server && npm install",
     "production": "NODE_ENV=production npm run build:prod && NODE_ENV=production npm run server:prod"
   },
-
   "engines": {
-  "node": "24.x"
-},
-
+    "node": "24.x"
+  },
   "dependencies": {
     "@radix-ui/react-accordion": "1.2.3",
     "@radix-ui/react-alert-dialog": "1.1.6",
