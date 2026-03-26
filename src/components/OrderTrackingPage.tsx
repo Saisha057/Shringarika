@@ -1,49 +1,95 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Search, Package } from 'lucide-react';
-import API from '../lib/api';
+import { orderAPI } from '../services/api';
 
 interface OrderTrackingPageProps {
-  onBack: () => void;
+  onNavigateBack: () => void;
 }
 
-export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
+export function OrderTrackingPage({ onNavigateBack }: OrderTrackingPageProps) {
   const [orderId, setOrderId] = useState('');
   const [order, setOrder] = useState<any>(null);
+  const [trackedOrderId, setTrackedOrderId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const pollTimerRef = useRef<number | null>(null);
+
+  const sanitizeOrderId = (rawOrderId: string) => rawOrderId.trim().replace(/^#+/, '');
+
+  const normalizeOrderResponse = (response: any) => {
+    const payload = response?.data || response;
+    const rawOrder = payload?.order || payload;
+
+    return {
+      ...rawOrder,
+      status:
+        rawOrder?.order_status ||
+        rawOrder?.orderStatus ||
+        rawOrder?.status ||
+        'Pending',
+      order_items: rawOrder?.order_items || rawOrder?.orderItems || [],
+    };
+  };
+
+  const fetchOrder = async (lookupOrderId: string, silent = false) => {
+    if (!silent) {
+      setIsLoading(true);
+      setError('');
+    }
+
+    try {
+      const response = await orderAPI.getById(lookupOrderId);
+      const normalizedOrder = normalizeOrderResponse(response);
+      setOrder(normalizedOrder);
+      if (!silent) {
+        setError('');
+      }
+    } catch (err: any) {
+      if (!silent) {
+        if (err.response?.status === 404) {
+          setError('Order not found. Please check your order ID.');
+        } else if (err.response?.status === 401) {
+          setError('Please login to track your order.');
+        } else if (err.response?.status === 403) {
+          setError('This order does not belong to your account.');
+        } else {
+          setError('Failed to track order. Please try again.');
+        }
+      }
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!trackedOrderId) return;
+
+    pollTimerRef.current = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchOrder(trackedOrderId, true);
+      }
+    }, 8000);
+
+    return () => {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+      }
+    };
+  }, [trackedOrderId]);
 
   const trackOrder = async () => {
-    if (!orderId.trim()) {
+    const cleanedOrderId = sanitizeOrderId(orderId);
+
+    if (!cleanedOrderId) {
       setError('Please enter an order ID');
       return;
     }
 
-    setIsLoading(true);
-    setError('');
     setOrder(null);
-
-    try {
-      const response = await API.get(
-        `/orders/${orderId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`
-          }
-        }
-      );
-      
-      setOrder(response.data.data || response.data);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setError('Order not found. Please check your order ID.');
-      } else if (err.response?.status === 401) {
-        setError('Please login to track your order.');
-      } else {
-        setError('Failed to track order. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setTrackedOrderId(cleanedOrderId);
+    await fetchOrder(cleanedOrderId);
   };
 
   const getStatusStep = (status: string) => {
@@ -97,7 +143,7 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
           <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200">
             <div
               className="h-full bg-black transition-all duration-500"
-              style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+              style={{ width: `${(Math.max(currentStep, 0) / (steps.length - 1)) * 100}%` }}
             />
           </div>
 
@@ -143,7 +189,7 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
               if (window.history.length > 1) {
                 window.history.back();
               } else {
-                onBack();
+                onNavigateBack();
               }
             }}
             className="text-sm mb-4 hover:underline"
@@ -193,14 +239,14 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
         {order && (
           <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
             {/* Status Timeline */}
-            <OrderStatusTimeline status={order.status} />
+            <OrderStatusTimeline status={order.status || 'Pending'} />
 
             {/* Order Info */}
             <div className="border-t pt-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <p className="text-sm text-gray-600">Order ID</p>
-                  <p className="font-semibold">{order.id}</p>
+                  <p className="font-semibold">{order.order_number || order.orderNumber || order.id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Order Date</p>
@@ -210,11 +256,11 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Payment Method</p>
-                  <p className="font-semibold">{order.payment_method}</p>
+                  <p className="font-semibold">{order.payment_method || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Amount</p>
-                  <p className="font-semibold">Rs.{order.total_price}</p>
+                  <p className="font-semibold">Rs.{order.total_price || order.total_amount || 0}</p>
                 </div>
               </div>
 
@@ -223,8 +269,8 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
                 <div className="mb-6">
                   <h4 className="font-semibold mb-2">Shipping Address</h4>
                   <p className="text-gray-700">
-                    {order.shipping_address.street}<br />
-                    {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.pinCode}<br />
+                    {order.shipping_address.doorNo ? `${order.shipping_address.doorNo}, ` : ''}{order.shipping_address.street}<br />
+                    {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.pinCode || order.shipping_address.pincode}<br />
                     {order.shipping_address.country || 'India'}
                   </p>
                 </div>
@@ -237,10 +283,10 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
                   {order.order_items?.map((item: any, index: number) => (
                     <div key={index} className="flex items-center gap-4 p-3 bg-neutral-50 rounded">
                       <div className="w-16 h-16 bg-neutral-200 rounded flex items-center justify-center">
-                        {item.product?.images?.[0] ? (
+                        {item.product?.images?.[0] || item.image || item.image_url ? (
                           <img
-                            src={item.product.images[0]}
-                            alt={item.product.name}
+                            src={item.product?.images?.[0] || item.image || item.image_url}
+                            alt={item.product?.name || item.productName || item.name || 'Product'}
                             className="w-full h-full object-cover rounded"
                           />
                         ) : (
@@ -248,12 +294,12 @@ export function OrderTrackingPage({ onBack }: OrderTrackingPageProps) {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold">{item.product?.name || 'Product'}</p>
+                        <p className="font-semibold">{item.product?.name || item.productName || item.name || 'Product'}</p>
                         <p className="text-sm text-gray-600">
-                          Quantity: {item.quantity} | Size: {item.size || 'N/A'}
+                          Quantity: {item.quantity} | Size: {item.size || item.variant?.size || 'N/A'}
                         </p>
                       </div>
-                      <p className="font-semibold">Rs.{item.price * item.quantity}</p>
+                      <p className="font-semibold">Rs.{(item.price || item.pricePerItem || 0) * (item.quantity || 0)}</p>
                     </div>
                   ))}
                 </div>
