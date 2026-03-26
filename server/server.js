@@ -117,7 +117,20 @@ if (process.env.ENABLE_COMPRESSION !== 'false') {
 
 // 2. Security headers
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable for development, enable in production
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: [
+        "'self'",
+        'https://shringarika.onrender.com',
+        'wss://shringarika.onrender.com',
+        'https://*.supabase.co',
+        'wss://*.supabase.co',
+        'https://api.razorpay.com',
+        'https://checkout.razorpay.com',
+      ],
+    },
+  },
   crossOriginEmbedderPolicy: false
 }));
 app.use(setSecurityHeaders);

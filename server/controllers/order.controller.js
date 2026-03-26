@@ -1015,3 +1015,104 @@ export const cancelOrder = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Public track order by order number or UUID
+// @route   GET /api/orders/track/:orderId
+// @access  Public
+export const trackOrderPublic = async (req, res, next) => {
+  try {
+    const rawOrderId = req.params.orderId || '';
+    const orderId = rawOrderId.trim().replace(/^#+/, '');
+
+    if (!orderId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Order ID is required',
+      });
+    }
+
+    const supabase = getSupabaseAdmin();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+    let query = supabase
+      .from('orders')
+      .select(`
+        id,
+        order_number,
+        order_status,
+        status,
+        payment_method,
+        total_price,
+        total_amount,
+        created_at,
+        estimated_delivery_date,
+        shipping_address,
+        tracking_number,
+        courier_service,
+        order_items (
+          id,
+          product_id,
+          quantity,
+          unit_price,
+          total_price,
+          product_name,
+          image_url,
+          variant_info,
+          products (
+            id,
+            name,
+            images
+          )
+        )
+      `)
+      .limit(1);
+
+    query = uuidRegex.test(orderId)
+      ? query.eq('id', orderId)
+      : query.eq('order_number', orderId);
+
+    const { data: rows, error } = await query;
+
+    if (error) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Failed to track order',
+      });
+    }
+
+    const order = rows?.[0];
+
+    if (!order) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Order not found',
+      });
+    }
+
+    const normalizedItems = (order.order_items || []).map((item) => {
+      const variantInfo = item.variant_info
+        ? (typeof item.variant_info === 'string' ? JSON.parse(item.variant_info) : item.variant_info)
+        : null;
+
+      return {
+        ...item,
+        image: item.image_url || item.products?.images?.[0] || null,
+        price: item.unit_price,
+        variant: variantInfo,
+      };
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        order: {
+          ...order,
+          orderStatus: order.order_status || order.status || 'Pending',
+          order_items: normalizedItems,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

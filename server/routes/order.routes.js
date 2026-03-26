@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import {
   createOrder,
   getOrderById,
+  trackOrderPublic,
   updateOrderToPaid,
   updateOrderStatus,
   updateTracking,
@@ -42,6 +43,7 @@ router.put('/:orderId/exchange/approve', protect, authorize('admin'), approveExc
 router.put('/:orderId/exchange/reject', protect, authorize('admin'), rejectExchange);
 
 // Generic order routes (keep after specific action routes)
+router.get('/track/:orderId', trackOrderPublic);
 router.get('/:id', protect, getOrderById);
 router.put('/:id/pay', protect, updateOrderToPaid);
 router.put('/:id/status', protect, authorize('admin'), updateOrderStatus);

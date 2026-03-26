@@ -38,7 +38,7 @@ export function OrderTrackingPage({ onNavigateBack }: OrderTrackingPageProps) {
     }
 
     try {
-      const response = await orderAPI.getById(lookupOrderId);
+      const response = await orderAPI.trackByOrderId(lookupOrderId);
       const normalizedOrder = normalizeOrderResponse(response);
       setOrder(normalizedOrder);
       if (!silent) {

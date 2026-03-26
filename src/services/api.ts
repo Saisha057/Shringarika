@@ -8,7 +8,7 @@ const API_BASE_URL = API_ORIGIN ? `${API_ORIGIN}/api` : '/api';
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 45000
+  timeout: 120000
 });
 
 // Request interceptor to add auth token
@@ -632,12 +632,17 @@ export const orderAPI = {
     paymentMethod: string;
     totalPrice: number;
   }) => {
-    const response = await api.post('/orders', orderData, { timeout: 45000 });
+    const response = await api.post('/orders', orderData, { timeout: 120000 });
     return response.data;
   },
 
   getById: async (id: string) => {
     const response = await api.get(`/orders/${id}`);
+    return response.data;
+  },
+
+  trackByOrderId: async (orderId: string) => {
+    const response = await api.get(`/orders/track/${orderId}`);
     return response.data;
   },
 
