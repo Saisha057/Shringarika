@@ -13,7 +13,7 @@ export interface Product {
   price?: number // Legacy field
   base_price?: number // Supabase schema field
   discount_price?: number | null // Supabase schema field
-  label?: "NEW" | "SALE" | "LIMITED" | null
+  label?: "NEW" | "SALE" | "LIMITED" | "BEST SELLER" | null
   color?: string
   colors?: string[]
   category: Category | string // Support both Category type and plain string

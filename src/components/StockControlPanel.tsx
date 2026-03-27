@@ -6,14 +6,14 @@ import { useAdmin } from "../context/AdminContext"
 
 export function StockControlPanel() {
   const { products, stock, updateStock, toggleProductVisibility, getProductStock, markAsNewArrival, markAsFeatured } = useAdmin()
-  const [expandedProduct, setExpandedProduct] = useState<number | null>(null)
+  const [expandedProduct, setExpandedProduct] = useState<string | number | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [variantTotals, setVariantTotals] = useState<Record<number, number>>({})
+  const [variantTotals, setVariantTotals] = useState<Record<string, number>>({})
 
   useEffect(() => {
     if (products.length === 0) return
     const fetchVariantTotals = async () => {
-      const totals: Record<number, number> = {}
+      const totals: Record<string, number> = {}
       await Promise.all(
         products.map(async (p) => {
           try {
@@ -21,7 +21,7 @@ export function StockControlPanel() {
             if (res.ok) {
               const data = await res.json()
               const variants: any[] = data.data || data
-              totals[p.id] = variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
+              totals[String(p.id)] = variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
             }
           } catch {}
         })
@@ -49,13 +49,14 @@ export function StockControlPanel() {
       {/* Products List */}
       <div className="space-y-2 md:space-y-3">
         {filteredProducts.map((product) => {
-          const productStock = getProductStock(product.id)
+          const productId = String(product.id)
+          const productStock = getProductStock(productId)
           const isVisible = productStock?.isVisible ?? true
           const isNewArrival = productStock?.isNewArrival ?? false
           const isFeatured = productStock?.isFeatured ?? false
           const sizes = productStock?.sizes || {}
           const legacyStock = Object.values(sizes).reduce((sum, qty) => sum + (typeof qty === "number" ? qty : 0), 0)
-          const totalStock = variantTotals[product.id] !== undefined ? variantTotals[product.id] : legacyStock
+          const totalStock = variantTotals[productId] !== undefined ? variantTotals[productId] : legacyStock
 
           return (
             <div
@@ -81,7 +82,7 @@ export function StockControlPanel() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      toggleProductVisibility(product.id)
+                      toggleProductVisibility(productId)
                     }}
                     className="p-1.5 md:p-2 hover:bg-neutral-200 rounded transition-colors shrink-0"
                     title={isVisible ? "Hide product" : "Show product"}
@@ -118,7 +119,7 @@ export function StockControlPanel() {
                     <p className="text-xs font-semibold tracking-wide text-neutral-700">PRODUCT TAGS</p>
                     <div className="flex gap-2 flex-wrap">
                       <button
-                        onClick={() => markAsNewArrival(product.id, !isNewArrival)}
+                        onClick={() => markAsNewArrival(productId, !isNewArrival)}
                         className={`px-2 md:px-3 py-1.5 text-xs rounded transition-colors font-semibold ${
                           isNewArrival
                             ? "bg-blue-500 text-white"
@@ -128,7 +129,7 @@ export function StockControlPanel() {
                         NEW ARRIVAL
                       </button>
                       <button
-                        onClick={() => markAsFeatured(product.id, !isFeatured)}
+                        onClick={() => markAsFeatured(productId, !isFeatured)}
                         className={`px-2 md:px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1 font-semibold ${
                           isFeatured
                             ? "bg-yellow-500 text-white"
@@ -145,7 +146,7 @@ export function StockControlPanel() {
                   <div className="space-y-2">
                     <p className="text-xs font-semibold tracking-wide text-neutral-700">INVENTORY BY SIZE</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                      {product.sizes.map((size) => {
+                      {(product.sizes ?? []).map((size) => {
                         const quantity = sizes[size] ?? 50
                         const isOutOfStock = quantity === 0
 
@@ -157,7 +158,7 @@ export function StockControlPanel() {
                                 type="number"
                                 value={quantity}
                                 onChange={(e) =>
-                                  updateStock(product.id, size, Math.max(0, Number.parseInt(e.target.value) || 0))
+                                  updateStock(productId, size, Math.max(0, Number.parseInt(e.target.value) || 0))
                                 }
                                 className={`flex-1 px-2 py-1 border rounded text-xs text-center focus:outline-none focus:ring-2 focus:ring-black ${
                                   isOutOfStock ? "bg-red-50 border-red-300" : "border-neutral-300"

@@ -28,7 +28,6 @@ function ToggleGroup({
         "group/toggle-group flex w-fit items-center rounded-md data-[variant=outline]:shadow-xs",
         className,
       )}
-      type="single"
       {...props}
     >
       <ToggleGroupContext.Provider value={{ variant, size }}>{children}</ToggleGroupContext.Provider>

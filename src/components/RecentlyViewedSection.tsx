@@ -88,7 +88,7 @@ export function RecentlyViewedSection({ onNavigateHome, onViewProduct, isStandal
             {recentItems.map((item) => {
               const fullProduct = products.find(p => p.id === item.id)
               // Use full product image if available, otherwise use cached image
-              const imageUrl = fullProduct?.images?.[0] || fullProduct?.image || item.image;
+              const imageUrl = fullProduct?.images?.[0] ?? "/placeholder-product.jpg";
               
               return (
                 <div key={item.id} className="group relative bg-white rounded overflow-hidden shadow-sm hover:shadow-md transition-all">
@@ -133,7 +133,7 @@ export function RecentlyViewedSection({ onNavigateHome, onViewProduct, isStandal
                     </button>
 
                     {/* Out of stock overlay */}
-                    {fullProduct && fullProduct.stock !== undefined && fullProduct.stock <= 0 && (
+                    {fullProduct && fullProduct.inStock === false && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <span className="text-white text-sm font-medium">OUT OF STOCK</span>
                       </div>

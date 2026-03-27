@@ -221,7 +221,7 @@ export function WishlistPage({ onNavigateHome, onViewProduct }: WishlistPageProp
                     <div className="mb-3">
                       <p className="text-xs tracking-wider mb-2">SELECT SIZE:</p>
                       <div className="flex flex-wrap gap-2">
-                        {fullProduct.sizes.map((size) => (
+                        {(fullProduct.sizes ?? []).map((size) => (
                           <button
                             key={size}
                             onClick={() => setSelectedSize(size)}

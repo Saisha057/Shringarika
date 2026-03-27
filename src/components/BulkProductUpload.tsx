@@ -111,7 +111,8 @@ export function BulkProductUpload({ onClose }: { onClose: () => void }) {
       const parsedProduct = parsedProducts[i]
       
       // Generate unique ID
-      const newId = Math.max(...products.map(p => p.id), 0) + i + 1
+      const newId =
+        Math.max(0, ...products.map(p => Number(p.id) || 0)) + i + 1
       
       const newProduct: Product = {
         id: newId,
@@ -119,15 +120,11 @@ export function BulkProductUpload({ onClose }: { onClose: () => void }) {
         price: parsedProduct.price,
         category: parsedProduct.category,
         description: parsedProduct.description || '',
-        image: parsedProduct.image || undefined,
         images: parsedProduct.image ? [parsedProduct.image] : [],
         sizes: parsedProduct.sizes || ['M'],
         colors: parsedProduct.colors || [],
         rating: parsedProduct.rating || 4.5,
         reviews: parsedProduct.reviews || 0,
-        stock: parsedProduct.stock,
-        bestseller: false,
-        newArrival: false,
       }
 
       // Save to localStorage

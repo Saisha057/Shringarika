@@ -17,6 +17,8 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [showFilters, setShowFilters] = useState(false);
 
+  const asProductId = (id: string | number) => Number(id) || 0;
+
   const categories = ['ALL', 'SAREES', 'UNSTITCHED SUIT', 'PURE GEORGETTE KURTI', 'CHANDERI SILK', 'MUSLIN CLOTH', 'MUL COTTON', 'BOTTOM WEARS'];
 
   // Load recent searches from localStorage
@@ -107,7 +109,10 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
     }
 
     // Filter by price range
-    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    filtered = filtered.filter((p) => {
+      const price = Number(p.price ?? 0);
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
 
     return filtered;
   }, [debouncedQuery, selectedCategory, priceRange]);
@@ -277,12 +282,12 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
                   <div
                     key={product.id}
                     className="group cursor-pointer animate-fadeIn"
-                    onClick={() => onViewProduct(product.id)}
+                    onClick={() => onViewProduct(asProductId(product.id))}
                   >
                     <div className="relative bg-neutral-100 aspect-3/4 mb-3 overflow-hidden rounded-lg">
-                      {(product.images && product.images.length > 0) || product.image ? (
+                      {product.images?.[0] ? (
                         <OptimizedImage
-                          src={product.images?.[0] || product.image || ''}
+                          src={product.images?.[0] ?? "/placeholder-product.jpg"}
                           alt={product.name}
                           className="w-full h-full"
                           responsive={false}
@@ -310,7 +315,7 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
                           <Star
                             key={i}
                             className={`w-3 h-3 ${
-                              i < Math.floor(product.rating)
+                              i < Math.floor(product.rating ?? 0)
                                 ? 'fill-black stroke-black'
                                 : 'stroke-neutral-300'
                             }`}
@@ -331,12 +336,12 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
               <div
                 key={product.id}
                 className="group cursor-pointer animate-fadeIn"
-                onClick={() => onViewProduct(product.id)}
+                onClick={() => onViewProduct(asProductId(product.id))}
               >
                 <div className="relative bg-neutral-100 aspect-3/4 mb-3 overflow-hidden rounded-lg">
-                  {(product.images && product.images.length > 0) || product.image ? (
+                  {product.images?.[0] ? (
                     <OptimizedImage
-                      src={product.images?.[0] || product.image || ''}
+                      src={product.images?.[0] ?? "/placeholder-product.jpg"}
                       alt={product.name}
                       className="w-full h-full"
                       responsive={false}
@@ -358,7 +363,7 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onViewProduct(product.id);
+                      onViewProduct(asProductId(product.id));
                     }}
                     className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 text-xs tracking-wider rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-neutral-100"
                   >
@@ -374,7 +379,7 @@ export function SearchPage({ onNavigateHome, onViewProduct }: SearchPageProps) {
                       <Star
                         key={i}
                         className={`w-3 h-3 ${
-                          i < Math.floor(product.rating)
+                          i < Math.floor(product.rating ?? 0)
                             ? 'fill-black stroke-black'
                             : 'stroke-neutral-300'
                         }`}

@@ -115,7 +115,7 @@ export const useImagePreloader = (imageUrls: string[]) => {
 
     // Preload images in batches
     const batchSize = 3
-    const batches = []
+    const batches: string[][] = []
     for (let i = 0; i < imageUrls.length; i += batchSize) {
       batches.push(imageUrls.slice(i, i + batchSize))
     }

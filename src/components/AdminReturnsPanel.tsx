@@ -2,10 +2,59 @@ import React, { useState, useEffect } from 'react';
 import { X, Package, RefreshCw, Calendar, User, Mail, Phone, Camera, CheckCircle, XCircle, AlertCircle, Clock, Truck, Eye, FileText } from 'lucide-react';
 import { returnsAPI } from '../services/api';
 
+type ReturnStatus =
+  | 'requested'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'pickup_scheduled'
+  | 'picked_up'
+  | 'inspecting'
+  | 'accepted'
+  | 'completed'
+  | 'cancelled';
+
+type ReturnType = 'return' | 'refund' | 'exchange';
+
+interface ReturnOrderInfo {
+  order_number?: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  total_price?: number;
+}
+
+interface ReturnItem {
+  productName?: string;
+  quantity?: number;
+  variant?: string;
+  price?: number;
+}
+
+type ReturnPhoto = string | { url?: string };
+
+interface ReturnRecord {
+  id: string;
+  status: ReturnStatus;
+  return_type: ReturnType;
+  reason?: string;
+  reason_details?: string;
+  created_at: string;
+  orders?: ReturnOrderInfo;
+  return_items?: ReturnItem[];
+  refund_amount?: number;
+  refund_status?: string;
+  refund_method?: string;
+  refund_reference?: string;
+  admin_notes?: string;
+  rejection_reason?: string;
+  photos?: ReturnPhoto[];
+}
+
 const AdminReturnsPanel = () => {
-  const [returns, setReturns] = useState([]);
+  const [returns, setReturns] = useState<ReturnRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReturn, setSelectedReturn] = useState(null);
+  const [selectedReturn, setSelectedReturn] = useState<ReturnRecord | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [processing, setProcessing] = useState(false);
 
@@ -22,7 +71,7 @@ const AdminReturnsPanel = () => {
     try {
       const data = await returnsAPI.getAllReturns();
       if (data.status === 'success') {
-        setReturns(data.data.returns);
+        setReturns((data.data?.returns ?? []) as ReturnRecord[]);
       }
     } catch (error) {
       console.error('Error fetching returns:', error);
@@ -31,7 +80,11 @@ const AdminReturnsPanel = () => {
     }
   };
 
-  const handleUpdateStatus = async (returnId, newStatus, additionalData = {}) => {
+  const handleUpdateStatus = async (
+    returnId: string,
+    newStatus: ReturnStatus,
+    additionalData: { adminNotes?: string; rejectionReason?: string; resellable?: boolean; itemCondition?: string } = {}
+  ) => {
     setProcessing(true);
     try {
       const data = await returnsAPI.updateReturnStatus(returnId, newStatus, additionalData.adminNotes);
@@ -50,7 +103,7 @@ const AdminReturnsPanel = () => {
     }
   };
 
-  const handleProcessRefund = async (returnId) => {
+  const handleProcessRefund = async (returnId: string) => {
     const refundMethod = prompt('Enter refund method (e.g., original_payment_method, bank_transfer):');
     if (!refundMethod) return;
 
@@ -77,12 +130,12 @@ const AdminReturnsPanel = () => {
     }
   };
 
-  const handleApprove = async (returnId) => {
+  const handleApprove = async (returnId: string) => {
     const adminNotes = prompt('Enter approval notes (optional):');
-    await handleUpdateStatus(returnId, 'approved', { adminNotes });
+    await handleUpdateStatus(returnId, 'approved', { adminNotes: adminNotes ?? undefined });
   };
 
-  const handleReject = async (returnId) => {
+  const handleReject = async (returnId: string) => {
     const rejectionReason = prompt('Enter rejection reason:');
     if (!rejectionReason) {
       alert('Rejection reason is required');
@@ -91,10 +144,10 @@ const AdminReturnsPanel = () => {
     await handleUpdateStatus(returnId, 'rejected', { rejectionReason });
   };
 
-  const handleMarkResellable = async (returnId) => {
+  const handleMarkResellable = async (returnId: string) => {
     const resellable = window.confirm('Is this item in resellable condition?');
     const itemCondition = prompt('Enter item condition (e.g., like_new, good, fair):');
-    await handleUpdateStatus(returnId, 'accepted', { resellable, itemCondition });
+    await handleUpdateStatus(returnId, 'accepted', { resellable, itemCondition: itemCondition ?? undefined });
   };
 
   const filteredReturns = returns.filter((ret) => {
@@ -108,7 +161,7 @@ const AdminReturnsPanel = () => {
     return matchesStatus && matchesType && matchesSearch;
   });
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
     const statusConfig = {
       requested: { color: 'bg-blue-100 text-blue-800', icon: Clock },
       under_review: { color: 'bg-yellow-100 text-yellow-800', icon: Eye },
@@ -122,7 +175,7 @@ const AdminReturnsPanel = () => {
       cancelled: { color: 'bg-gray-100 text-gray-800', icon: XCircle },
     };
 
-    const config = statusConfig[status] || statusConfig.requested;
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.requested;
     const Icon = config.icon;
 
     return (
@@ -133,14 +186,14 @@ const AdminReturnsPanel = () => {
     );
   };
 
-  const getTypeBadge = (type) => {
+  const getTypeBadge = (type: string) => {
     const typeConfig = {
       return: { color: 'bg-blue-100 text-blue-800', icon: Package },
       refund: { color: 'bg-green-100 text-green-800', icon: RefreshCw },
       exchange: { color: 'bg-purple-100 text-purple-800', icon: RefreshCw },
     };
 
-    const config = typeConfig[type] || typeConfig.return;
+    const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.return;
     const Icon = config.icon;
 
     return (
@@ -310,7 +363,7 @@ const AdminReturnsPanel = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredReturns.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                     No returns found matching your filters
                   </td>
                 </tr>
@@ -471,7 +524,7 @@ const AdminReturnsPanel = () => {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-3">Items Being Returned</h4>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  {selectedReturn.return_items?.map((item, idx) => (
+                          {selectedReturn.return_items?.map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center">
                       <div>
                         <div className="font-medium text-gray-900">{item.productName}</div>
@@ -500,7 +553,7 @@ const AdminReturnsPanel = () => {
                     {selectedReturn.photos.map((photo, idx) => (
                       <div key={idx} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                         <img
-                          src={photo.url || photo}
+                          src={typeof photo === 'string' ? photo : photo.url || ''}
                           alt={`Return evidence ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
