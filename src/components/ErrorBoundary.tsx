@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
+import type * as SentryReact from '@sentry/react'
 import { AlertTriangle } from 'lucide-react'
 
 interface Props {
@@ -153,6 +154,6 @@ export class ErrorBoundary extends Component<Props, State> {
 // Extend Window interface for Sentry
 declare global {
   interface Window {
-    Sentry?: any
+    Sentry?: typeof SentryReact
   }
 }

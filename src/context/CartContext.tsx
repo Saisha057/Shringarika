@@ -19,11 +19,13 @@ export interface CartItem {
   variantId?: string | null; // UUID from product_inventory table
 }
 
+type ProductId = string | number;
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, size: string, color?: string) => void;
-  removeFromCart: (productId: number, size: string) => void;
-  updateQuantity: (productId: number, size: string, quantity: number) => void;
+  removeFromCart: (productId: ProductId, size: string) => void;
+  updateQuantity: (productId: ProductId, size: string, quantity: number) => void;
   clearCart: () => void;
   getCartCount: () => number;
   getCartTotal: () => number;
@@ -154,7 +156,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const existingItem = cart.find(
-      (item) => item.product.id === product.id && item.size === size && item.color === color
+      (item) =>
+        String(item.product.id) === String(product.id) &&
+        item.size === size &&
+        item.color === color
     );
 
     const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
@@ -198,7 +203,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prevCart) => {
       if (existingItem) {
         return prevCart.map((item) =>
-          item.product.id === product.id && item.size === size && item.color === color
+          String(item.product.id) === String(product.id) && item.size === size && item.color === color
             ? { ...item, quantity: item.quantity + 1, variantId }
             : item
         );
@@ -207,9 +212,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromCart = async (productId: number, size: string) => {
+  const removeFromCart = async (productId: ProductId, size: string) => {
     if (!user) {
-      const currentItem = cart.find((item) => item.product.id === productId && item.size === size);
+      const currentItem = cart.find((item) => String(item.product.id) === String(productId) && item.size === size);
       const nextGuest = removeFromGuestCart(
         String(productId),
         size,
@@ -223,7 +228,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // Update backend if user is logged in (fail silently if backend unavailable)
     if (user) {
       try {
-        const item = cart.find(i => i.product.id === productId && i.size === size);
+        const item = cart.find(i => String(i.product.id) === String(productId) && i.size === size);
         if (item) {
           // Backend expects itemId - use a combination of productId and size
           const itemId = `${productId}_${size}`;
@@ -243,18 +248,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     // Update local state
     setCart((prevCart) =>
-      prevCart.filter((item) => !(item.product.id === productId && item.size === size))
+      prevCart.filter((item) => !(String(item.product.id) === String(productId) && item.size === size))
     );
   };
 
-  const updateQuantity = async (productId: number, size: string, quantity: number) => {
+  const updateQuantity = async (productId: ProductId, size: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId, size);
       return;
     }
 
     if (!user) {
-      const currentItem = cart.find((item) => item.product.id === productId && item.size === size);
+      const currentItem = cart.find((item) => String(item.product.id) === String(productId) && item.size === size);
       const nextGuest = updateGuestCartQuantity(
         String(productId),
         size,
@@ -286,7 +291,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // Update local state
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.product.id === productId && item.size === size
+        String(item.product.id) === String(productId) && item.size === size
           ? { ...item, quantity }
           : item
       )
@@ -324,7 +329,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return cart.reduce((total, item) => total + Number(item.product.price ?? 0) * item.quantity, 0);
   };
 
   return (

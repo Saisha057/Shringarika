@@ -373,7 +373,7 @@ export function CheckoutPage({ onNavigateBack, onOrderPlaced }: CheckoutPageProp
       const guestUuid = !user ? crypto.randomUUID() : undefined;
 
       // Calculate order totals (NO TAX - product price only)
-      const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      const subtotal = cart.reduce((sum, item) => sum + (Number(item.product.price ?? 0) * item.quantity), 0);
       const deliveryCharge = 0; // Free delivery
       const discount = 0;
       const totalPrice = subtotal + deliveryCharge - discount;
@@ -385,7 +385,7 @@ export function CheckoutPage({ onNavigateBack, onOrderPlaced }: CheckoutPageProp
           product: item.product.id,
           name: item.product.name,
           quantity: item.quantity,
-          price: item.product.price,
+          price: Number(item.product.price ?? 0),
           variant: {
             id: item.variantId || null,
             size: item.size,
@@ -430,8 +430,8 @@ export function CheckoutPage({ onNavigateBack, onOrderPlaced }: CheckoutPageProp
           size: item.size,
           color: item.color || item.product.colors?.[0] || 'N/A',
           quantity: item.quantity,
-          price: item.product.price,
-          total: item.product.price * item.quantity,
+          price: Number(item.product.price ?? 0),
+          total: Number(item.product.price ?? 0) * item.quantity,
           image: item.product.images?.[0] || (item.product as any).image || null,
         })),
         subtotal: subtotal.toFixed(2),
