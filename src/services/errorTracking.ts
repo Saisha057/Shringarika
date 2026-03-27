@@ -85,7 +85,8 @@ export const logMessage = (message: string, level: 'info' | 'warning' | 'error' 
   if (window.Sentry) {
     window.Sentry.captureMessage(message, level)
   } else {
-    console[level](message)
+    const method: 'info' | 'warn' | 'error' = level === 'warning' ? 'warn' : level
+    console[method](message)
   }
 }
 

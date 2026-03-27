@@ -33,6 +33,7 @@ export interface Product {
   slug?: string // Supabase schema field
   brand?: string // Supabase schema field
   attributes?: any // JSONB field from Supabase
+  specifications?: Record<string, unknown>
   tags?: string[] // Supabase schema field
   created_at?: string
   updated_at?: string

@@ -22,7 +22,7 @@ import { productAPI } from '../services/api'
  */
 
 export interface StockInfo {
-  productId: number
+  productId: string
   sizes: Record<string, number> // size -> quantity
   isVisible: boolean
   isNewArrival: boolean
@@ -41,7 +41,7 @@ export interface RestockNotification {
 
 interface AdminContextType {
   products: Product[]
-  stock: Record<number, StockInfo>
+  stock: Record<string, StockInfo>
   restockNotifications: RestockNotification[]
   isAdminMode: boolean
 
@@ -121,7 +121,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
    * When this updates, all subscribers re-render
    */
   const [products, setProducts] = useState<Product[]>([])
-  const [stock, setStock] = useState<Record<number, StockInfo>>({})
+  const [stock, setStock] = useState<Record<string, StockInfo>>({})
   const [restockNotifications, setRestockNotifications] = useState<RestockNotification[]>([])
   // Keep admin mode session-local; do not auto-restore on app launch.
   const [isAdminMode, setIsAdminMode] = useState(false)
@@ -281,8 +281,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
       // Initialize stock for new product
       const newStock: StockInfo = {
-        productId: newProduct.id,
-        sizes: product.sizes.reduce((acc, size) => ({ ...acc, [size]: 50 }), {}),
+        productId: String(newProduct.id),
+        sizes: (product.sizes ?? []).reduce((acc, size) => ({ ...acc, [size]: 50 }), {}),
         isVisible: true,
         isNewArrival: false,
         isFeatured: false,
