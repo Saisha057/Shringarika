@@ -306,6 +306,10 @@ export function CheckoutPage({ onNavigateBack, onOrderPlaced }: CheckoutPageProp
   };
 
   const handlePlaceOrder = async () => {
+    if (isProcessing) {
+      return;
+    }
+
     // P1-001 FIX: Add comprehensive validation before placing order
     const validationErrors: string[] = [];
     
@@ -443,8 +447,8 @@ export function CheckoutPage({ onNavigateBack, onOrderPlaced }: CheckoutPageProp
         return;
       }
 
-      let orderId: string;
-      let orderNumber: string;
+      let orderId: string | undefined;
+      let orderNumber: string | undefined;
       let orderDataToStore: any = null;
 
       // COD: Create order in DB
@@ -746,9 +750,20 @@ export function CheckoutPage({ onNavigateBack, onOrderPlaced }: CheckoutPageProp
               razorpayPaymentId: response.razorpay_payment_id,
               razorpayOrderId: response.razorpay_order_id,
             } as any);
-            const order = orderResponse.data?.order || orderResponse.order || orderResponse;
-            const orderId = order?.id || order?.orderId || order?._id;
-            const orderNumber = order?.orderNumber || order?.order_number || orderId;
+            const orderPayload = orderResponse?.data || orderResponse;
+            const order = orderPayload?.order || orderResponse?.order || orderResponse;
+            const orderId =
+              orderPayload?.data?.orderId ||
+              orderPayload?.orderId ||
+              order?.id ||
+              order?.orderId ||
+              order?._id;
+            const orderNumber =
+              orderPayload?.data?.orderNumber ||
+              orderPayload?.orderNumber ||
+              order?.orderNumber ||
+              order?.order_number ||
+              orderId;
 
             if (!orderId) {
               throw new Error('Order created but ID not returned. Please contact support.');

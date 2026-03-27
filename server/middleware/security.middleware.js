@@ -125,7 +125,12 @@ export const verifyOrigin = (req, res, next) => {
   const origin = req.get('origin') || req.get('referer');
   const isProduction = process.env.NODE_ENV === 'production';
   const allowedOrigins = isProduction
-    ? ['https://shringarika.studio', 'https://www.shringarika.studio']
+    ? [
+        'https://shringarika.studio',
+        'https://www.shringarika.studio',
+        'https://shringarika.onrender.com',
+        process.env.FRONTEND_URL,
+      ].filter(Boolean)
     : [
         process.env.FRONTEND_URL,
         'http://localhost:3000',

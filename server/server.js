@@ -138,7 +138,12 @@ app.use(setSecurityHeaders);
 // 3. CORS configuration
 const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = isProduction
-  ? ["https://shringarika.studio", "https://www.shringarika.studio"]
+  ? [
+      'https://shringarika.studio',
+      'https://www.shringarika.studio',
+      'https://shringarika.onrender.com',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean)
   : [
       "http://localhost:5173",
       "http://localhost:3000",
@@ -147,7 +152,7 @@ const allowedOrigins = isProduction
       process.env.FRONTEND_URL,
     ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin:function(origin, callback){
     if(!origin) return callback(null,true);
 
@@ -157,8 +162,13 @@ app.use(cors({
       callback(new Error("CORS not allowed"));
     }
   },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials:true
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // 4. Rate limiting - Prevent API abuse
 app.use('/api/admin', adminLimiter);
