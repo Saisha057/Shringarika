@@ -16,7 +16,7 @@
     "production": "NODE_ENV=production npm run build:prod && NODE_ENV=production npm run server:prod"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=20"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "1.2.3",
