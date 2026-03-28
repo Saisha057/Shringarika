@@ -6,7 +6,7 @@
 // ============================================================================
 
 import { Request, Response } from 'express';
-import { getSupabaseAdmin } from '../config/supabase.admin.mjs';
+import { getSupabaseAdmin } from '../config/supabase.admin';
 import {
   verifyUpiSchema,
   verifyBankSchema,
@@ -109,7 +109,7 @@ async function mockVerifyBank(
 export async function verifyUpi(req: Request, res: Response) {
   try {
     const supabase = getSupabaseAdmin();
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -120,7 +120,7 @@ export async function verifyUpi(req: Request, res: Response) {
     if (!validation.success) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: validation.error.errors,
+        details: validation.error.issues,
       });
     }
 
@@ -223,7 +223,7 @@ export async function verifyUpi(req: Request, res: Response) {
 export async function verifyBank(req: Request, res: Response) {
   try {
     const supabase = getSupabaseAdmin();
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -234,7 +234,7 @@ export async function verifyBank(req: Request, res: Response) {
     if (!validation.success) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: validation.error.errors,
+        details: validation.error.issues,
       });
     }
 
@@ -346,7 +346,7 @@ export async function verifyBank(req: Request, res: Response) {
 export async function savePaymentMethod(req: Request, res: Response) {
   try {
     const supabase = getSupabaseAdmin();
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -357,7 +357,7 @@ export async function savePaymentMethod(req: Request, res: Response) {
     if (!validation.success) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: validation.error.errors,
+        details: validation.error.issues,
       });
     }
 
@@ -404,7 +404,7 @@ export async function savePaymentMethod(req: Request, res: Response) {
 export async function getPaymentMethods(req: Request, res: Response) {
   try {
     const supabase = getSupabaseAdmin();
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -440,7 +440,7 @@ export async function getPaymentMethods(req: Request, res: Response) {
 export async function updatePaymentMethod(req: Request, res: Response) {
   try {
     const supabase = getSupabaseAdmin();
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { id } = req.params;
 
     if (!userId) {
@@ -452,7 +452,7 @@ export async function updatePaymentMethod(req: Request, res: Response) {
     if (!validation.success) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: validation.error.errors,
+        details: validation.error.issues,
       });
     }
 
@@ -487,7 +487,7 @@ export async function updatePaymentMethod(req: Request, res: Response) {
 export async function deletePaymentMethod(req: Request, res: Response) {
   try {
     const supabase = getSupabaseAdmin();
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { id } = req.params;
 
     if (!userId) {

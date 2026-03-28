@@ -82,7 +82,7 @@ export function OrderConfirmationPage({ orderId, onNavigateHome, onContinueShopp
           console.log('✅ Loaded order confirmation for order:', orderId);
         } else {
           console.warn('⚠️ Order not found in localStorage for orderId:', orderId);
-          console.log('📦 Available orders:', orders.map(o => o.orderId));
+          console.log('📦 Available orders:', orders.map((o: any) => o.orderId));
           setError(`Order not found: ${orderId}`);
         }
       } catch (err) {

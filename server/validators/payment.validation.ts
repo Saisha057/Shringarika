@@ -75,9 +75,7 @@ export type VerifyBankInput = z.infer<typeof verifyBankSchema>;
 // ============================================================================
 
 export const savePaymentMethodSchema = z.object({
-  type: z.enum(['UPI', 'BANK'], {
-    errorMap: () => ({ message: 'Type must be either UPI or BANK' }),
-  }),
+  type: z.enum(['UPI', 'BANK']),
   
   identifier: z.string().min(3).max(255),
   
@@ -89,11 +87,15 @@ export const savePaymentMethodSchema = z.object({
   
   // Must be verified before saving
   is_verified: z.literal(true, {
-    errorMap: () => ({
-      message: 'Payment method must be verified before saving',
-    }),
+    message: 'Payment method must be verified before saving',
   }),
-});
+}).refine(
+  (data) => data.type === 'UPI' || data.type === 'BANK',
+  {
+    message: 'Type must be either UPI or BANK',
+    path: ['type'],
+  }
+);
 
 export type SavePaymentMethodInput = z.infer<typeof savePaymentMethodSchema>;
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * INTEGRATION EXAMPLES
  * 
@@ -453,7 +454,7 @@ const handleSubmit = async (e) => {
 const validatePassword = (password: string) => {
   const result = validatePasswordStrength(password);
   if (!result.isValid) {
-    setErrors(result.messages);
+    console.error('Password validation errors:', result.messages);
     return false;
   }
   return true;

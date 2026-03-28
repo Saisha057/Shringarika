@@ -5,8 +5,8 @@
 
 import { Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
-import { getSupabaseAdmin } from '../config/supabase.admin.mjs';
+import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
+import { getSupabaseAdmin } from '../config/supabase.admin';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -98,14 +98,21 @@ export async function googleAuth(req: Request, res: Response) {
     }
 
     // Generate JWT token
+    const secret: Secret =
+      process.env.JWT_SECRET ?? 'fallback_secret';
+
+    const options: SignOptions = {
+      expiresIn: (process.env.JWT_EXPIRE ?? '7d') as SignOptions['expiresIn'],
+    };
+
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
         role: user.role,
       },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+      secret,
+      options
     );
 
     // Return user data and token

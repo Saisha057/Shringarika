@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Integration Example: Adding ProductVariantsPanel to AdminDashboard
 // Location: src/components/AdminDashboard.tsx or similar admin products page
 

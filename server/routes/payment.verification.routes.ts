@@ -13,7 +13,7 @@ import {
   updatePaymentMethod,
   deletePaymentMethod,
 } from '../controllers/payment.verification.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { protect as authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
