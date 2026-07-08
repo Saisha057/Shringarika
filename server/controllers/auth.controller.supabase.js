@@ -46,21 +46,56 @@ export const register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user in Supabase
-    const { data: user, error } = await supabase
+    let user;
+    let error;
+
+    // Prefer the current schema used by the app (name/phone/password).
+    // Fall back to the legacy schema when the deployment database has not been migrated.
+    ({ data: user, error } = await supabase
       .from('users')
       .insert([
         {
+          name: name || email,
           email,
-          password_hash: hashedPassword,
+          phone: phone || null,
+          password: hashedPassword,
           role: 'customer',
-          is_active: true,
           is_verified: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
       ])
       .select()
-      .single();
+      .single());
+
+    if (error) {
+      const fallbackToLegacySchema = /column .*password|column .*name|column .*phone/i.test(error.message || '');
+
+      if (!fallbackToLegacySchema) {
+        console.error('Supabase registration error:', error);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Failed to create account',
+          error: error.message,
+        });
+      }
+
+      ({ data: user, error } = await supabase
+        .from('users')
+        .insert([
+          {
+            email,
+            password_hash: hashedPassword,
+            role: 'customer',
+            is_active: true,
+            is_verified: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ])
+        .select()
+        .single());
+    }
 
     if (error) {
       console.error('Supabase registration error:', error);
@@ -100,8 +135,9 @@ export const register = async (req, res, next) => {
     // Generate token with user info
     const token = generateToken(user.id, user.email, user.role);
 
-    // Remove password from response and add name
+    // Remove password fields from response and add name
     delete user.password_hash;
+    delete user.password;
     user.name = name || user.email;
 
     res.status(201).json({
@@ -156,8 +192,18 @@ export const login = async (req, res, next) => {
 
     console.log('✅ User found:', user.email, 'Role:', user.role);
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    // Check password from whichever schema the deployment uses
+    const storedPassword = user.password || user.password_hash;
+
+    if (!storedPassword) {
+      console.error('Authentication schema mismatch: users table is missing a password field');
+      return res.status(500).json({
+        status: 'error',
+        message: 'Authentication schema is not configured correctly',
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, storedPassword);
 
     if (!isPasswordValid) {
       console.log('❌ Invalid password for:', email);
@@ -191,6 +237,7 @@ export const login = async (req, res, next) => {
 
     // Remove password from response and add profile info
     delete user.password_hash;
+    delete user.password;
     
     // Add name from profile or use email
     if (profile) {

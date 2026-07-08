@@ -150,7 +150,7 @@ export const getProducts = async (req, res, next) => {
     let query = supabase
       .from('products')
       .select('*', { count: 'exact' })
-      .eq('is_active', true); // ✅ Only return active (non-deleted) products
+      ;
 
     // Filters
     if (category) {
