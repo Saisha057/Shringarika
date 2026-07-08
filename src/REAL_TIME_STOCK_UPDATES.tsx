@@ -6,7 +6,7 @@
 // =============================================================================
 
 import { useEffect, useState } from 'react';
-import { supabase } from '../config/supabase';
+import { supabase } from './config/supabase';
 
 interface StockStatus {
   exists: boolean;
@@ -108,7 +108,7 @@ export const useRealTimeStock = ({
           table: 'product_inventory',
           filter: `product_id=eq.${productId}`
         },
-        (payload) => {
+        (payload: any) => {
           console.log('[useRealTimeStock] Real-time update received:', payload);
 
           // Check if this update is for our specific variant
@@ -158,7 +158,7 @@ export const useRealTimeStock = ({
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         console.log('[useRealTimeStock] Subscription status:', status);
       });
 

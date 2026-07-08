@@ -5,7 +5,7 @@ import { AlertTriangle, Bell, X, Settings } from "lucide-react"
 import { useAdmin } from "../context/AdminContext"
 
 interface LowStockAlert {
-  productId: number
+  productId: string | number
   productName: string
   category: string
   currentStock: number
@@ -44,7 +44,9 @@ export function LowStockAlerts() {
 
     products.forEach(product => {
       const stock = getProductStock(product.id)
-      const currentStock = stock?.stock ?? product.stock ?? 0
+      const currentStock = stock
+        ? Object.values(stock.sizes || {}).reduce((sum, qty) => sum + (typeof qty === "number" ? qty : 0), 0)
+        : 0
 
       let severity: 'critical' | 'warning' | 'low' | null = null
       if (currentStock <= thresholds.critical) {
@@ -59,7 +61,7 @@ export function LowStockAlerts() {
         lowStockProducts.push({
           productId: product.id,
           productName: product.name,
-          category: product.category,
+          category: String(product.category ?? ""),
           currentStock,
           threshold: thresholds[severity],
           severity,

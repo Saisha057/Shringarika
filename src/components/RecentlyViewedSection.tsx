@@ -35,8 +35,8 @@ export function RecentlyViewedSection({ onNavigateHome, onViewProduct, isStandal
     }
   }
 
-  const handleRemoveItem = (productId: number) => {
-    const updated = recentItems.filter(item => item.id !== productId)
+  const handleRemoveItem = (productId: string | number) => {
+    const updated = recentItems.filter(item => String(item.id) !== String(productId))
     setRecentItems(updated)
     const key = user?.id ? `recentlyViewed_${user.id}` : 'recentlyViewed_guest'
     localStorage.setItem(key, JSON.stringify(updated))
@@ -86,7 +86,7 @@ export function RecentlyViewedSection({ onNavigateHome, onViewProduct, isStandal
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {recentItems.map((item) => {
-              const fullProduct = products.find(p => p.id === item.id)
+              const fullProduct = products.find(p => String(p.id) === String(item.id))
               // Use full product image if available, otherwise use cached image
               const imageUrl = fullProduct?.images?.[0] ?? "/placeholder-product.jpg";
               
@@ -95,7 +95,7 @@ export function RecentlyViewedSection({ onNavigateHome, onViewProduct, isStandal
                   {/* Product Image */}
                   <div 
                     className="aspect-[3/4] relative overflow-hidden cursor-pointer bg-neutral-100"
-                    onClick={() => onViewProduct?.(item.id)}
+                    onClick={() => onViewProduct?.(Number(item.id))}
                   >
                     {imageUrl ? (
                       <img
@@ -145,7 +145,7 @@ export function RecentlyViewedSection({ onNavigateHome, onViewProduct, isStandal
                     <p className="text-xs text-neutral-500 mb-1">{item.category}</p>
                     <h3 
                       className="text-sm md:text-base font-medium mb-2 line-clamp-2 cursor-pointer hover:underline"
-                      onClick={() => onViewProduct?.(item.id)}
+                      onClick={() => onViewProduct?.(Number(item.id))}
                     >
                       {item.name}
                     </h3>

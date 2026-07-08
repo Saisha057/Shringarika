@@ -16,7 +16,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 interface ProductVariant {
   id: string
-  productId: number
+  productId: string | number
   sku: string
   size?: string
   color?: string
@@ -177,8 +177,8 @@ export function ProductVariantsManager({ product, onClose, onSave }: ProductVari
     }
   }
 
-  const generateSKU = (productId: number, size?: string, color?: string, material?: string): string => {
-    const category = product.category.substring(0, 4).toUpperCase()
+  const generateSKU = (productId: string | number, size?: string, color?: string, material?: string): string => {
+    const category = String(product.category).substring(0, 4).toUpperCase()
     const sizeCode = size ? size.substring(0, 2).toUpperCase() : 'OS'
     const colorCode = color ? color.substring(0, 3).toUpperCase() : 'STD'
     const materialCode = material ? material.substring(0, 3).toUpperCase() : 'REG'
@@ -380,9 +380,10 @@ export function ProductVariantsManager({ product, onClose, onSave }: ProductVari
     }
   }
 
-  const calculateVariantPrice = (basePrice: number, modifier: number | undefined): number => {
+  const calculateVariantPrice = (basePrice: number | undefined, modifier: number | undefined): number => {
+    const validBasePrice = Number(basePrice) || 0
     const validModifier = Number(modifier) || 0
-    return basePrice + (basePrice * validModifier / 100)
+    return validBasePrice + (validBasePrice * validModifier / 100)
   }
 
   const totalStock = variants.reduce((sum, v) => sum + v.stock, 0)

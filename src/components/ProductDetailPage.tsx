@@ -15,20 +15,20 @@ import { StockStatus, StockIndicator } from './StockStatus';
 import { useVariantStock } from '../hooks/useVariantStock';
 
 interface ProductDetailPageProps {
-  productId: number
+  productId: string | number
   onNavigateBack: () => void
   onNavigateToCart?: () => void
 }
 
 export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart }: ProductDetailPageProps) {
   const { products, getProductStock } = useAdmin()
-  const product = products.find((p) => p.id === productId)
+  const product = products.find((p) => String(p.id) === String(productId))
   const { addToCart, cart } = useCart()
   const { user } = useAuth()
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   // Initialize real-time stock management
-  const { stockMap, getStock, isLowStock: checkLowStock } = useVariantStock(product?.id || 0)
+  const { stockMap, getStock, isLowStock: checkLowStock } = useVariantStock(String(product?.id ?? ""))
 
   // NEW: Add state for dynamically fetched variants
   const [availableColors, setAvailableColors] = useState<string[]>([])
@@ -416,7 +416,7 @@ export function ProductDetailPage({ productId, onNavigateBack, onNavigateToCart 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-3 md:mb-4">
                 <p className="text-lg sm:text-xl md:text-2xl font-bold mt-1 sm:mt-2">₹{Number(product.price || 0).toFixed(2)}</p>
                 {/* Only show rating if there are actual customer reviews */}
-                {product.reviews > 0 && (
+                {Number(product.reviews ?? 0) > 0 && (
                   <div className="flex items-center gap-2">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (

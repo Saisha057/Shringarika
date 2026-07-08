@@ -7,7 +7,7 @@ import { X, Bell } from "lucide-react"
 import { useAdmin } from "../context/AdminContext"
 
 interface RestockNotificationModalProps {
-  productId: number
+  productId: string | number
   size: string
   isOpen: boolean
   onClose: () => void

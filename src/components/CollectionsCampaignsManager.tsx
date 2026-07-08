@@ -13,7 +13,7 @@ interface Campaign {
   startDate: string
   endDate: string
   status: 'active' | 'scheduled' | 'ended'
-  productIds: number[]
+  productIds: Array<string | number>
   bannerImage?: string
   priority: number
 }
@@ -23,7 +23,7 @@ interface Collection {
   name: string
   description: string
   slug: string
-  productIds: number[]
+  productIds: Array<string | number>
   isActive: boolean
   createdAt: string
 }
@@ -46,7 +46,7 @@ export function CollectionsCampaignsManager({ onClose }: CollectionsCampaignsMan
     name: '',
     description: '',
     slug: '',
-    productIds: [] as number[],
+    productIds: [] as Array<string | number>,
     isActive: true
   })
 
@@ -57,7 +57,7 @@ export function CollectionsCampaignsManager({ onClose }: CollectionsCampaignsMan
     discountPercentage: 0,
     startDate: '',
     endDate: '',
-    productIds: [] as number[],
+    productIds: [] as Array<string | number>,
     bannerImage: '',
     priority: 5
   })
@@ -242,7 +242,7 @@ export function CollectionsCampaignsManager({ onClose }: CollectionsCampaignsMan
     setShowCampaignForm(false)
   }
 
-  const toggleProductInCollection = (productId: number) => {
+  const toggleProductInCollection = (productId: string | number) => {
     setCollectionForm(prev => ({
       ...prev,
       productIds: prev.productIds.includes(productId)
@@ -251,7 +251,7 @@ export function CollectionsCampaignsManager({ onClose }: CollectionsCampaignsMan
     }))
   }
 
-  const toggleProductInCampaign = (productId: number) => {
+  const toggleProductInCampaign = (productId: string | number) => {
     setCampaignForm(prev => ({
       ...prev,
       productIds: prev.productIds.includes(productId)

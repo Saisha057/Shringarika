@@ -42,7 +42,7 @@ interface UseVariantStockReturn {
  * @param productId - The product ID to track stock for
  * @returns Stock data, loading state, error state, and utility functions
  */
-export function useVariantStock(productId: string): UseVariantStockReturn {
+export function useVariantStock(productId: string | number): UseVariantStockReturn {
   const [stockMap, setStockMap] = useState<StockMap | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

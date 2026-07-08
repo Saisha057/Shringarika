@@ -64,14 +64,14 @@ export function ProductsPage({ onNavigateHome, onViewProduct }: ProductsPageProp
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "PRICE_LOW":
-          return a.price - b.price
+          return Number(a.price ?? 0) - Number(b.price ?? 0)
         case "PRICE_HIGH":
-          return b.price - a.price
+          return Number(b.price ?? 0) - Number(a.price ?? 0)
         case "BEST_SELLING":
-          return b.reviews - a.reviews
+          return Number(b.reviews ?? 0) - Number(a.reviews ?? 0)
         case "NEWEST":
         default:
-          return b.id - a.id
+          return Number(b.id) - Number(a.id)
       }
     })
 
@@ -161,7 +161,7 @@ export function ProductsPage({ onNavigateHome, onViewProduct }: ProductsPageProp
             <div key={product.id} className="group cursor-pointer">
               {/* Product Image */}
               <div
-                onClick={() => onViewProduct(product.id)}
+                onClick={() => onViewProduct(Number(product.id))}
                 className="relative bg-neutral-200 aspect-3/4 mb-2 md:mb-4 overflow-hidden border border-neutral-300 hover:border-neutral-500 transition-colors"
               >
                 {primaryImage ? (
@@ -192,7 +192,7 @@ export function ProductsPage({ onNavigateHome, onViewProduct }: ProductsPageProp
                 {/* Quick View Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <button
-                    onClick={() => onViewProduct(product.id)}
+                    onClick={() => onViewProduct(Number(product.id))}
                     className="bg-white text-black px-4 md:px-6 py-2 text-xs md:text-sm tracking-wider transform translate-y-4 group-hover:translate-y-0 transition-transform"
                   >
                     QUICK VIEW
@@ -201,7 +201,7 @@ export function ProductsPage({ onNavigateHome, onViewProduct }: ProductsPageProp
               </div>
 
               {/* Product Info */}
-              <div onClick={() => onViewProduct(product.id)} className="space-y-1">
+              <div onClick={() => onViewProduct(Number(product.id))} className="space-y-1">
                             <h3 className="text-xs sm:text-sm md:text-base font-medium tracking-wider mt-2 line-clamp-2 group-hover:underline">{product.name}</h3>
                             <p className="text-xs text-neutral-500 mt-0.5 truncate">
                   {product.colors && product.colors.length > 0 ? product.colors.join(", ") : product.color}

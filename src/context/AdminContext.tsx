@@ -22,7 +22,7 @@ import { productAPI } from '../services/api'
  */
 
 export interface StockInfo {
-  productId: string
+  productId: string | number
   sizes: Record<string, number> // size -> quantity
   isVisible: boolean
   isNewArrival: boolean
@@ -33,7 +33,7 @@ export interface StockInfo {
 export interface RestockNotification {
   id: string
   email: string
-  productId: string
+  productId: string | number
   size: string
   notified: boolean
   createdAt: Date
@@ -47,25 +47,25 @@ interface AdminContextType {
 
   // Product management
   addProduct: (product: Product) => void
-  updateProduct: (productId: string, updates: Partial<Product>) => void
-  deleteProduct: (productId: string) => void
+  updateProduct: (productId: string | number, updates: Partial<Product>) => void
+  deleteProduct: (productId: string | number) => void
 
   // Stock management
-  updateStock: (productId: string, size: string, quantity: number) => void
-  toggleProductVisibility: (productId: string) => void
-  getProductStock: (productId: string) => StockInfo | undefined
+  updateStock: (productId: string | number, size: string, quantity: number) => void
+  toggleProductVisibility: (productId: string | number) => void
+  getProductStock: (productId: string | number) => StockInfo | undefined
 
   // Restock notifications
-  addRestockNotification: (email: string, productId: string, size: string) => void
-  getRestockNotifications: (productId: string, size: string) => RestockNotification[]
-  notifyRestocked: (productId: string, size: string) => void
+  addRestockNotification: (email: string, productId: string | number, size: string) => void
+  getRestockNotifications: (productId: string | number, size: string) => RestockNotification[]
+  notifyRestocked: (productId: string | number, size: string) => void
 
   // Admin mode
   setAdminMode: (isAdmin: boolean) => void
 
   // New arrivals management
-  markAsNewArrival: (productId: string, isNew: boolean) => void
-  markAsFeatured: (productId: string, isFeatured: boolean) => void
+  markAsNewArrival: (productId: string | number, isNew: boolean) => void
+  markAsFeatured: (productId: string | number, isFeatured: boolean) => void
   getNewArrivals: () => Product[]
   getFeaturedProducts: () => Product[]
 }
@@ -304,7 +304,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   /**
    * UPDATE EXISTING PRODUCT
    */
-  const updateProduct = async (productId: string, updates: Partial<Product>) => {
+  const updateProduct = async (productId: string | number, updates: Partial<Product>) => {
     try {
       console.log("📝 Updating product:", productId, "with updates:", updates)
       
@@ -421,7 +421,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const updateStock = (productId: string, size: string, quantity: number) => {
+  const updateStock = (productId: string | number, size: string, quantity: number) => {
     setStock((prev) => ({
       ...prev,
       [String(productId)]: {
@@ -440,7 +440,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const toggleProductVisibility = (productId: string) => {
+  const toggleProductVisibility = (productId: string | number) => {
     setStock((prev) => ({
       ...prev,
       [String(productId)]: {
@@ -450,11 +450,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }))
   }
 
-  const getProductStock = (productId: string) => {
+  const getProductStock = (productId: string | number) => {
     return stock[String(productId)]
   }
 
-  const addRestockNotification = (email: string, productId: string, size: string) => {
+  const addRestockNotification = (email: string, productId: string | number, size: string) => {
     const newNotification: RestockNotification = {
       id: `notif_${Date.now()}`,
       email,
@@ -466,17 +466,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setRestockNotifications((prev) => [...prev, newNotification])
   }
 
-  const getRestockNotifications = (productId: string, size: string) => {
+  const getRestockNotifications = (productId: string | number, size: string) => {
     return restockNotifications.filter(
-      (notif) => notif.productId === productId && notif.size === size && !notif.notified,
+      (notif) => String(notif.productId) === String(productId) && notif.size === size && !notif.notified,
     )
   }
 
-  const notifyRestocked = (productId: string, size: string) => {
+  const notifyRestocked = (productId: string | number, size: string) => {
     // Mark notifications as notified and simulate email sending
     setRestockNotifications((prev) =>
       prev.map((notif) =>
-        notif.productId === productId && notif.size === size && !notif.notified ? { ...notif, notified: true } : notif,
+        String(notif.productId) === String(productId) && notif.size === size && !notif.notified ? { ...notif, notified: true } : notif,
       ),
     )
 
@@ -494,7 +494,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('isAdminMode')
   }
 
-  const markAsNewArrival = (productId: string, isNew: boolean) => {
+  const markAsNewArrival = (productId: string | number, isNew: boolean) => {
     setStock((prev) => ({
       ...prev,
       [String(productId)]: {
@@ -504,7 +504,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }))
   }
 
-  const markAsFeatured = (productId: string, isFeatured: boolean) => {
+  const markAsFeatured = (productId: string | number, isFeatured: boolean) => {
     setStock((prev) => ({
       ...prev,
       [String(productId)]: {

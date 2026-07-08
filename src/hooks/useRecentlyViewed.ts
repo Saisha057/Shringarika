@@ -5,7 +5,7 @@ const MAX_RECENTLY_VIEWED = 12;
 const STORAGE_KEY = 'recentlyViewed';
 
 export interface RecentlyViewedItem {
-  id: number;
+  id: string | number;
   name: string;
   price: number;
   image?: string;
@@ -45,9 +45,9 @@ export function useRecentlyViewed() {
       const newItem: RecentlyViewedItem = {
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: Number(product.price ?? 0),
         image: product.images && product.images.length > 0 ? product.images[0] : undefined,
-        category: product.category,
+        category: String(product.category ?? ''),
         viewedAt: new Date().toISOString(),
       };
       

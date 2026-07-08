@@ -119,7 +119,7 @@ export function AdminProductForm({ product, onClose }: AdminProductFormProps) {
           sizes: finalFormData.sizes.length > 0 ? finalFormData.sizes : ["S", "M", "L"],
           washCare: finalFormData.washCare.length > 0 ? finalFormData.washCare : ["Hand wash recommended"],
         }
-        console.log("🎉 Creating product:", finalFormData.name, "| Category:", finalFormData.category, "| SubType:", finalFormData.subType, "| Images:", newProduct.images.length, "| Color:", finalFormData.color)
+        console.log("🎉 Creating product:", finalFormData.name, "| Category:", finalFormData.category, "| SubType:", finalFormData.subType, "| Images:", newProduct.images?.length ?? 0, "| Color:", finalFormData.color)
         addProduct(newProduct)
         console.log("✅ Product creation completed")
         alert(`Product "${finalFormData.name}" added successfully! Returning to dashboard...`)

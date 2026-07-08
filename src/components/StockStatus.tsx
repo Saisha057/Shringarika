@@ -5,7 +5,7 @@ import { AlertCircle, AlertTriangle, CheckCircle, Package } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext'
 
 interface StockStatusProps {
-  productId: string;
+  productId: string | number;
   variant?: string;
   quantity?: number;
   showLabel?: boolean;
@@ -207,7 +207,7 @@ export const StockBadge: React.FC<StockBadgeProps> = ({ stock, className = '' })
 };
 
 interface StockIndicatorProps {
-  productId: string;
+  productId: string | number;
   variant?: string;
   onStockStatusChange?: (inStock: boolean, available: number) => void;
 }
@@ -234,7 +234,7 @@ export const StockIndicator: React.FC<StockIndicatorProps> = ({
     const fetchStockStatus = async () => {
       // Try admin-context snapshot first so local admin edits reflect immediately
       try {
-        const adminSnapshot = getProductStock(Number(productId));
+        const adminSnapshot = getProductStock(productId);
         if (adminSnapshot) {
           const available = variant
             ? (adminSnapshot.sizes?.[variant] ?? 0)
